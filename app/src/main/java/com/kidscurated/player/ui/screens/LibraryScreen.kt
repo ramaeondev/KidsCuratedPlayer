@@ -122,11 +122,11 @@ fun VideosLibrary(navController: NavController?) {
                         .clip(RoundedCornerShape(8.dp))
                         .background(Color.DarkGray)
                 ) {
-                    AsyncImage(
-                        model = video.thumbnailUrl,
+                    com.kidscurated.player.ui.components.VideoThumbnail(
+                        videoId = video.id,
+                        videoUri = video.youtubeUrl,
                         contentDescription = video.title,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        modifier = Modifier.fillMaxSize()
                     )
                     
                     // Play button overlay
@@ -244,11 +244,11 @@ fun ShortsLibrary(navController: NavController?) {
                         navController?.navigate("video_player/${short.id}")
                     }
             ) {
-                AsyncImage(
-                    model = short.thumbnailUrl,
+                com.kidscurated.player.ui.components.VideoThumbnail(
+                    videoId = short.id,
+                    videoUri = short.youtubeUrl,
                     contentDescription = short.title,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+                    modifier = Modifier.fillMaxSize()
                 )
                 
                 // Play button

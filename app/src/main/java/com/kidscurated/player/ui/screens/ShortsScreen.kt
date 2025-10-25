@@ -75,7 +75,7 @@ fun ShortsScreen(navController: NavController) {
                 ) {
                     items(shorts) { short ->
                         ShortItem(video = short, onClick = {
-                            navController.navigate("video_player/${short.id}")
+                            navController.navigate("shorts_player/${short.id}")
                         })
                     }
                 }
@@ -94,11 +94,11 @@ fun ShortItem(video: Video, onClick: () -> Unit) {
             .background(Color.Black)
     ) {
         // Thumbnail
-        AsyncImage(
-            model = video.thumbnailUrl,
+        com.kidscurated.player.ui.components.VideoThumbnail(
+            videoId = video.id,
+            videoUri = video.youtubeUrl,
             contentDescription = video.title,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            modifier = Modifier.fillMaxSize()
         )
         
         // YouTube-style Play Button in Center

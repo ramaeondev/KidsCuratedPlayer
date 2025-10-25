@@ -38,6 +38,12 @@ object LocalVideoScanner {
                 println("📁 Scanning device gallery for all videos...")
                 val videos = scanAllDeviceVideos(context)
                 println("✅ Found ${videos.size} videos in gallery")
+                
+                // Generate thumbnails in background for all videos
+                videos.forEach { video ->
+                    ThumbnailGenerator.getThumbnail(context, video.id, video.youtubeUrl)
+                }
+                
                 videos
             } catch (e: Exception) {
                 println("❌ Error scanning gallery videos: ${e.message}")

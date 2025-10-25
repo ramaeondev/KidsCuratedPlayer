@@ -99,11 +99,11 @@ fun VideoItem(video: Video, onClick: () -> Unit) {
                 .height(220.dp)
                 .background(Color.DarkGray)
         ) {
-            AsyncImage(
-                model = video.thumbnailUrl,
+            com.kidscurated.player.ui.components.VideoThumbnail(
+                videoId = video.id,
+                videoUri = video.youtubeUrl,
                 contentDescription = video.title,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                modifier = Modifier.fillMaxSize()
             )
             
             // YouTube-style Play Button in Center

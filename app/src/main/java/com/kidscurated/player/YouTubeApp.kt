@@ -17,6 +17,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.kidscurated.player.ui.screens.HomeScreen
 import com.kidscurated.player.ui.screens.ShortsScreen
+import com.kidscurated.player.ui.screens.ShortsPlayerScreen
 import com.kidscurated.player.ui.screens.LibraryScreen
 import com.kidscurated.player.ui.screens.VideoPlayerScreen
 
@@ -74,7 +75,7 @@ fun YouTubeApp() {
             }
         },
         bottomBar = {
-            if (currentRoute != null && !currentRoute.startsWith("video_player")) {
+            if (currentRoute != null && !currentRoute.startsWith("video_player") && !currentRoute.startsWith("shorts_player")) {
                 NavigationBar(
                     containerColor = Color.Black,
                     contentColor = Color.White
@@ -126,6 +127,10 @@ fun YouTubeApp() {
             composable("video_player/{videoId}") { backStackEntry ->
                 val videoId = backStackEntry.arguments?.getString("videoId")
                 VideoPlayerScreen(videoId = videoId ?: "", navController = navController)
+            }
+            composable("shorts_player/{videoId}") { backStackEntry ->
+                val videoId = backStackEntry.arguments?.getString("videoId")
+                ShortsPlayerScreen(videoId = videoId ?: "", navController = navController)
             }
         }
     }
