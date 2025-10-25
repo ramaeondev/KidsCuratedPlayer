@@ -38,10 +38,23 @@ fun VideoThumbnail(
         scope.launch {
             isLoading = true
             try {
+                println("🖼️ VideoThumbnail: Loading thumbnail for $videoId")
                 val path = ThumbnailGenerator.getThumbnail(context, videoId, videoUri)
-                thumbnailPath = path
+                if (path != null) {
+                    println("✅ VideoThumbnail: Got thumbnail path: $path")
+                    val file = File(path)
+                    if (file.exists()) {
+                        println("✅ VideoThumbnail: File exists: ${file.length()} bytes")
+                        thumbnailPath = path
+                    } else {
+                        println("❌ VideoThumbnail: File doesn't exist: $path")
+                    }
+                } else {
+                    println("❌ VideoThumbnail: No thumbnail path returned")
+                }
             } catch (e: Exception) {
-                println("❌ Error loading thumbnail: ${e.message}")
+                println("❌ VideoThumbnail: Error loading thumbnail: ${e.message}")
+                e.printStackTrace()
             } finally {
                 isLoading = false
             }

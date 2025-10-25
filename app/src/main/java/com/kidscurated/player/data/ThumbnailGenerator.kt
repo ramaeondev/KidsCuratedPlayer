@@ -33,22 +33,23 @@ object ThumbnailGenerator {
                 }
                 
                 // Generate new thumbnail
-                println("🎬 Generating thumbnail for video: $videoId")
-                val bitmap = extractThumbnailFromVideo(videoUri)
+                println("🎬 Generating thumbnail for video: $videoId (URI: $videoUri)")
+                val bitmap = extractThumbnailFromVideo(context, videoUri)
                 
                 if (bitmap != null) {
+                    println("✅ ThumbnailGenerator: Extracted bitmap ${bitmap.width}x${bitmap.height}")
                     // Save to cache
                     saveThumbnail(thumbnailFile, bitmap)
                     bitmap.recycle() // Free memory
-                    println("✅ Thumbnail saved: ${thumbnailFile.absolutePath}")
+                    println("✅ ThumbnailGenerator: Thumbnail saved: ${thumbnailFile.absolutePath}")
                     return@withContext thumbnailFile.absolutePath
                 } else {
-                    println("❌ Failed to extract thumbnail from video")
+                    println("❌ ThumbnailGenerator: Failed to extract thumbnail bitmap from video")
                     return@withContext null
                 }
                 
             } catch (e: Exception) {
-                println("❌ Error generating thumbnail: ${e.message}")
+                println("❌ ThumbnailGenerator: Error generating thumbnail: ${e.message}")
                 e.printStackTrace()
                 return@withContext null
             }
@@ -58,23 +59,42 @@ object ThumbnailGenerator {
     /**
      * Extract thumbnail bitmap from video at first frame
      */
-    private fun extractThumbnailFromVideo(videoUri: String): Bitmap? {
+    private fun extractThumbnailFromVideo(context: Context, videoUri: String): Bitmap? {
         var retriever: MediaMetadataRetriever? = null
         try {
             retriever = MediaMetadataRetriever()
-            retriever.setDataSource(videoUri)
+            
+            // Handle both content:// URIs and file:// paths
+            if (videoUri.startsWith("content://")) {
+                println("🎬 ThumbnailGenerator: Using content:// URI")
+                retriever.setDataSource(context, Uri.parse(videoUri))
+            } else {
+                println("🎬 ThumbnailGenerator: Using file path")
+                retriever.setDataSource(videoUri)
+            }
             
             // Get frame at 1 second (better than first frame which might be black)
+            println("🎬 ThumbnailGenerator: Extracting frame at 1 second...")
             val bitmap = retriever.getFrameAtTime(
                 1_000_000, // 1 second in microseconds
                 MediaMetadataRetriever.OPTION_CLOSEST_SYNC
             )
             
+            if (bitmap == null) {
+                println("❌ ThumbnailGenerator: getFrameAtTime returned null, trying at 0...")
+                // Try at beginning if 1 second fails
+                return retriever.getFrameAtTime(
+                    0,
+                    MediaMetadataRetriever.OPTION_CLOSEST_SYNC
+                )?.let { resizeBitmap(it, THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT) }
+            }
+            
             // Resize to thumbnail dimensions
             return bitmap?.let { resizeBitmap(it, THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT) }
             
         } catch (e: Exception) {
-            println("❌ Error extracting frame: ${e.message}")
+            println("❌ ThumbnailGenerator: Error extracting frame: ${e.message}")
+            e.printStackTrace()
             return null
         } finally {
             try {
