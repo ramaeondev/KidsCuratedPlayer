@@ -70,15 +70,20 @@ fun VideoPlayerScreen(videoId: String, navController: NavController) {
                         settings.mediaPlaybackRequiresUserGesture = false
                         settings.loadWithOverviewMode = true
                         settings.useWideViewPort = true
-                        settings.userAgentString = "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
+                        
+                        // Use mobile user agent only for shorts
+                        if (isShort) {
+                            settings.userAgentString = "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
+                        }
+                        
                         webChromeClient = WebChromeClient()
                         webViewClient = WebViewClient()
                         
-                        // For shorts, use the regular YouTube URL instead of embed
+                        // For shorts, use the mobile YouTube URL; for videos, use embed
                         val playUrl = if (isShort) {
                             "https://m.youtube.com/shorts/$videoId"
                         } else {
-                            "https://www.youtube.com/embed/$videoId?autoplay=1&controls=1&showinfo=0&rel=0"
+                            "https://www.youtube.com/embed/$videoId?autoplay=1&controls=1&showinfo=0&rel=0&modestbranding=1"
                         }
                         loadUrl(playUrl)
                     }
