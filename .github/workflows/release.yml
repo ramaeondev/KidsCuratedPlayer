@@ -1,0 +1,129 @@
+name: Create Release with APK
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on version tags like v1.0.0, v1.1.0, etc.
+  workflow_dispatch:  # Manual trigger option
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'gradle'
+      
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      
+      - name: Create local.properties
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+      
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --stacktrace
+      
+      - name: Get version name
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Rename APK with version
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          cp app/build/outputs/apk/debug/app-debug.apk app-${VERSION}.apk
+      
+      - name: Create Release Notes
+        id: release_notes
+        run: |
+          cat > release_notes.md << 'EOF'
+          ## 🎬 Kids Curated Player - Release ${{ steps.version.outputs.VERSION }}
+          
+          ### 📱 Download & Install
+          
+          1. **Download** the APK file below
+          2. **Transfer** to your Android device
+          3. **Enable** "Install from Unknown Sources" in Settings
+          4. **Tap** the APK to install
+          5. **Launch** KidsCuratedPlayer
+          
+          ### ✨ Features
+          
+          - YouTube-like interface for kids
+          - Parent-curated video feeds
+          - No algorithms, no Shorts addiction
+          - WebView-based video playback
+          - Home, Shorts, and Library sections
+          - Offline installation (no Play Store needed)
+          
+          ### 🎯 Customization
+          
+          To add your own videos:
+          1. Edit `app/src/main/java/com/kidscurated/player/data/VideoRepository.kt`
+          2. Replace sample videos with your YouTube video IDs
+          3. Rebuild using GitHub Actions or locally
+          
+          ### 📚 Documentation
+          
+          - [Quick Start Guide](https://github.com/${{ github.repository }}/blob/main/QUICK_START.md)
+          - [Video Configuration Guide](https://github.com/${{ github.repository }}/blob/main/VIDEO_CONFIGURATION_GUIDE.md)
+          - [Parent Safety Guide](https://github.com/${{ github.repository }}/blob/main/PARENT_SAFETY_GUIDE.md)
+          - [Build Guide](https://github.com/${{ github.repository }}/blob/main/BUILD_GUIDE.md)
+          
+          ### 🔧 Technical Details
+          
+          - **Min Android Version:** 7.0 (API 24)
+          - **Target Android Version:** 14 (API 34)
+          - **APK Size:** ~18 MB
+          - **Architecture:** Universal (ARM, x86)
+          
+          ### ⚠️ Important Notes
+          
+          - This is a debug APK for personal use
+          - No data collection or tracking
+          - No user accounts required
+          - Internet needed only for video playback
+          - Videos are loaded directly from YouTube
+          
+          ---
+          
+          **Built with ❤️ for parents protecting their kids from algorithmic addiction**
+          EOF
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          name: Kids Curated Player ${{ steps.version.outputs.VERSION }}
+          body_path: release_notes.md
+          files: |
+            app-${{ steps.version.outputs.VERSION }}.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload APK as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk-${{ steps.version.outputs.VERSION }}
+          path: app-${{ steps.version.outputs.VERSION }}.apk
+          retention-days: 90
