@@ -68,11 +68,19 @@ fun VideoPlayerScreen(videoId: String, navController: NavController) {
                         settings.javaScriptEnabled = true
                         settings.domStorageEnabled = true
                         settings.mediaPlaybackRequiresUserGesture = false
+                        settings.loadWithOverviewMode = true
+                        settings.useWideViewPort = true
+                        settings.userAgentString = "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
                         webChromeClient = WebChromeClient()
                         webViewClient = WebViewClient()
                         
-                        val embedUrl = "https://www.youtube.com/embed/$videoId?autoplay=1&controls=1&showinfo=0&rel=0"
-                        loadUrl(embedUrl)
+                        // For shorts, use the regular YouTube URL instead of embed
+                        val playUrl = if (isShort) {
+                            "https://m.youtube.com/shorts/$videoId"
+                        } else {
+                            "https://www.youtube.com/embed/$videoId?autoplay=1&controls=1&showinfo=0&rel=0"
+                        }
+                        loadUrl(playUrl)
                     }
                 },
                 modifier = Modifier.fillMaxSize()
