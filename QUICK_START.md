@@ -1,157 +1,172 @@
-# 🚀 QUICK START GUIDE
+# 🎬 Kids Curated Player - Quick Start
 
-Get your Kids Curated Player up and running in 5 simple steps!
+## ✅ What Changed
 
-## Step 1: Add Your Videos (5 minutes)
+**Your app now works 100% offline with local videos from your device!**
 
-1. Open this file in any text editor:
-   ```
-   app/src/main/java/com/kidscurated/player/data/VideoRepository.kt
-   ```
+- ❌ No more YouTube dependency
+- ❌ No more Supabase database
+- ❌ No more internet required
+- ✅ Videos stored on your phone
+- ✅ Complete privacy and control
+- ✅ Works offline forever
 
-2. Find a YouTube video you want to add (example: `https://www.youtube.com/watch?v=dQw4w9WgXcQ`)
+---
 
-3. Extract the video ID: `dQw4w9WgXcQ` (the part after `v=`)
+## 📱 Setup in 3 Steps
 
-4. Add to the `curatedVideos` list:
-   ```kotlin
-   Video(
-       id = "dQw4w9WgXcQ",
-       title = "My First Video",
-       channelName = "Cool Channel",
-       thumbnailUrl = "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
-       views = "1M views",
-       uploadTime = "1 day ago",
-       duration = "5:30",
-       youtubeUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-   ),
-   ```
-
-5. Add as many videos as you want!
-
-## Step 2: Install Android Studio (15 minutes)
-
-1. Download from: https://developer.android.com/studio
-2. Install with default settings
-3. Launch Android Studio
-4. Wait for initial setup to complete
-
-## Step 3: Open the Project (2 minutes)
-
-1. In Android Studio: **File → Open**
-2. Navigate to and select the `KidsCuratedPlayer` folder
-3. Click **Open**
-4. Wait for Gradle sync to complete (progress bar at bottom)
-
-## Step 4: Build the APK (3 minutes)
-
-1. Click: **Build → Build Bundle(s) / APK(s) → Build APK(s)**
-2. Wait for "BUILD SUCCESSFUL" message
-3. Click **locate** in the notification that appears
-
-OR find your APK here:
+### Step 1: Create Folder
+On your phone, create:
 ```
-KidsCuratedPlayer/app/build/outputs/apk/debug/app-debug.apk
+/Internal Storage/Movies/KidsVideos/
 ```
 
-## Step 5: Install on Your Device (5 minutes)
-
-### Option A: Direct Install via USB
-1. Connect Android device to computer via USB
-2. Enable USB Debugging on device:
-   - Settings → About Phone → Tap "Build Number" 7 times
-   - Settings → Developer Options → Enable USB Debugging
-3. In Android Studio, click the green **Run** button (▶)
-4. Select your device from the list
-5. App will install and launch automatically!
-
-### Option B: Manual APK Install
-1. Copy `app-debug.apk` to your Android device (via USB, email, cloud, etc.)
-2. On device: Settings → Security → Enable "Install from Unknown Sources"
-3. Open the APK file using a file manager
-4. Tap **Install**
-5. Launch the app!
-
----
-
-## 🎉 Done! Your App is Ready!
-
-Open the app and you'll see your curated videos ready to play.
-
----
-
-## 🔧 Quick Customizations
-
-### Change App Name
-**File:** `app/src/main/res/values/strings.xml`
-```xml
-<string name="app_name">MyKidsTube</string>
+### Step 2: Add Videos
+Copy MP4 videos to that folder with this naming:
+```
+Happy Birthday Song - Kids Channel.mp4
+[Short] Dance Time - Fun Videos.mp4
 ```
 
-### Change App Icon
-1. Right-click `app/src/main/res` folder
-2. **New → Image Asset**
-3. Select your icon image
-4. Click **Next** → **Finish**
+### Step 3: Install App
+Download the latest APK from GitHub releases and install.
 
-### Add More Videos
-Just edit `VideoRepository.kt` and rebuild!
+**That's it!** 🎉
 
 ---
 
-## ⚡ Super Quick Build (Terminal)
+## 📝 File Naming Rules
 
-If you prefer command line:
+| Format | Example | Result |
+|--------|---------|--------|
+| `Title - Channel.mp4` | `ABC Song - Learning.mp4` | Regular video |
+| `[Short] Title - Channel.mp4` | `[Short] Dance - Kids.mp4` | Shows in Shorts |
+| `Just Title.mp4` | `MyVideo.mp4` | Works, channel shows as "Local Videos" |
 
-```bash
-# Navigate to project
-cd /Users/ramu/Documents/GitHub/KidsCuratedPlayer
+---
 
-# Make gradlew executable (Mac/Linux only)
-chmod +x gradlew
+## 🔑 First Launch
 
-# Build APK
-./gradlew assembleDebug
+When you first open the app:
+1. You'll see permission request for "Videos"
+2. Tap **Allow** 
+3. App scans your KidsVideos folder
+4. Videos appear in Home and Shorts tabs
 
-# APK location:
-# app/build/outputs/apk/debug/app-debug.apk
+---
+
+## 📂 Where to Put Videos
+
+**Best location:**
+```
+/Internal Storage/Movies/KidsVideos/
 ```
 
----
+**Alternative locations** (app checks these too):
+```
+/Internal Storage/DCIM/KidsVideos/
+/Android/data/com.kidscurated.player/files/Movies/KidsVideos/
+```
 
-## 🆘 Quick Troubleshooting
-
-**Problem:** Gradle sync fails  
-**Solution:** Check internet connection, restart Android Studio
-
-**Problem:** Build fails  
-**Solution:** Build → Clean Project, then Build → Rebuild Project
-
-**Problem:** Can't install APK  
-**Solution:** Enable "Install from Unknown Sources" in device Settings → Security
-
-**Problem:** Video won't play  
-**Solution:** Check internet connection, verify video ID is correct
+**Or anywhere** with these in filename:
+- "rhyme"
+- "song"
+- "[Short]"
 
 ---
 
-## 📚 Need More Help?
+## 🎥 Supported Formats
 
-- **Full Documentation:** See `README.md`
-- **Detailed Build Guide:** See `BUILD_GUIDE.md`
-- **Video Configuration:** See `VIDEO_CONFIGURATION_GUIDE.md`
-- **Project Overview:** See `PROJECT_SUMMARY.md`
+- ✅ `.mp4` (Best - recommended)
+- ✅ `.mkv`
+- ✅ `.avi`
+- ✅ `.mov`
+- ✅ `.webm`
+- ✅ `.3gp`
+
+**Recommended settings:**
+- Resolution: 720p or 480p
+- Format: MP4 (H.264 codec)
+- File size: 20-50MB per video
+- Duration: 2-5 minutes
 
 ---
 
-## ✅ Checklist
+## 🔧 Troubleshooting
 
-- [ ] Added at least 3-5 videos to VideoRepository.kt
-- [ ] Opened project in Android Studio
-- [ ] Gradle sync completed successfully
-- [ ] Built APK (no errors)
-- [ ] Installed on Android device
-- [ ] Launched app successfully
-- [ ] Videos play correctly
+### "No videos found"
+- Check folder is named exactly: `KidsVideos`
+- Make sure files are `.mp4` format
+- Grant storage permission in Settings > Apps > Kids Curated Player > Permissions
+- Try restarting the app
 
-**Enjoy your safe, curated YouTube experience for kids! 🎈📱**
+### Videos won't play
+- Convert to MP4 format (use VLC or Handbrake)
+- Make sure codec is H.264
+- Test file plays on computer first
+
+### Permission denied
+- Go to Settings > Apps > Kids Curated Player
+- Tap Permissions
+- Enable "Files and Media" or "Videos"
+
+---
+
+## 💡 Pro Tips
+
+1. **Organize by channel name** - Use consistent channel names for easier browsing
+2. **Keep videos short** - 2-5 minutes works best for kids
+3. **Use 720p quality** - Good balance of quality and file size
+4. **Test on computer first** - Make sure video plays before copying
+5. **Batch convert** - Use Handbrake to convert many videos at once
+
+---
+
+## 📊 Example Setup
+
+```
+/Internal Storage/Movies/KidsVideos/
+├── ABC Song - Learning Time.mp4 (45MB, 3:20)
+├── Happy Birthday - Rhymes.mp4 (38MB, 2:45)
+├── [Short] Dance Moves - Kids Fun.mp4 (12MB, 0:45)
+├── [Short] Color Song - Toddlers.mp4 (15MB, 1:00)
+├── Nursery Rhymes Collection - Baby Songs.mp4 (82MB, 8:15)
+└── Animal Sounds - Educational.mp4 (55MB, 4:30)
+```
+
+App will show:
+- **Home tab**: 4 regular videos
+- **Shorts tab**: 2 short videos
+
+---
+
+## 🎯 Why This is Better
+
+| Old Way (YouTube/DB) | New Way (Local Files) |
+|---------------------|----------------------|
+| Internet required | Works offline |
+| YouTube tracking | Zero tracking |
+| Hosting costs | Free forever |
+| Limited control | Complete control |
+| Can break anytime | Always works |
+| Complex setup | Simple file copy |
+
+---
+
+## 📦 Download APK
+
+Latest version: https://github.com/ramaeondev/KidsCuratedPlayer/releases/download/latest/app-debug-latest.apk
+
+GitHub repo: https://github.com/ramaeondev/KidsCuratedPlayer
+
+---
+
+## ❓ Need Help?
+
+Check the detailed guide: `LOCAL_VIDEO_SETUP.md`
+
+Or open an issue on GitHub: https://github.com/ramaeondev/KidsCuratedPlayer/issues
+
+---
+
+**Enjoy your ad-free, tracking-free, offline kids video player! 🎉**
