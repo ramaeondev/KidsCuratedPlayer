@@ -2,6 +2,7 @@ package com.kidscurated.player.data
 
 import android.content.ContentResolver
 import android.content.Context
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.provider.MediaStore
 import kotlinx.coroutines.Dispatchers
@@ -12,12 +13,17 @@ import java.io.File
  * Scans local storage for videos in the KidsVideos folder
  * 
  * Expected file naming format:
- * - Regular videos: "Title - Channel Name.mp4"
- * - Short videos: "[Short] Title - Channel Name.mp4"
+ * - "Title - Channel Name.mp4" → Title and Channel extracted, resolution auto-detected
+ * - "[Short] Title - Channel.mp4" → Forced into Shorts tab regardless of resolution
  * 
- * Example:
- * - "Happy Birthday Song - Kids Rhymes.mp4" -> Regular video
- * - "[Short] ABC Song - Kids Learning.mp4" -> Short video
+ * Auto-detection:
+ * - Portrait/Vertical videos (height > width) → Automatically classified as Shorts
+ * - Landscape/Horizontal videos (width > height) → Automatically classified as Regular videos
+ * 
+ * Examples:
+ * - "Happy Birthday Song - Kids Rhymes.mp4" (1920x1080) → Regular video (Home tab)
+ * - "Dance Time - Fun Kids.mp4" (1080x1920) → Short video (Shorts tab)
+ * - "[Short] ABC Song - Learning.mp4" (1920x1080) → Forced Short (Shorts tab)
  */
 object LocalVideoScanner {
     
@@ -150,14 +156,17 @@ object LocalVideoScanner {
     
     /**
      * Parse video metadata from file
-     * Expected format: "[Short] Title - Channel Name.mp4"
+     * Auto-detects if it's a short based on aspect ratio (portrait = short)
+     * Expected format: "Title - Channel Name.mp4" or "[Short] Title - Channel Name.mp4"
      */
     private fun parseVideoFromFile(file: File): Video? {
         val fileName = file.nameWithoutExtension
-        val isShort = fileName.startsWith("[Short]", ignoreCase = true)
+        
+        // Check if explicitly marked as short in filename
+        val explicitlyMarkedShort = fileName.startsWith("[Short]", ignoreCase = true)
         
         // Remove [Short] prefix if present
-        val cleanName = if (isShort) {
+        val cleanName = if (explicitlyMarkedShort) {
             fileName.removePrefix("[Short]").trim()
         } else {
             fileName
@@ -169,6 +178,9 @@ object LocalVideoScanner {
         val channelName = parts.getOrNull(1)?.trim() ?: "Local Videos"
         
         val uri = Uri.fromFile(file)
+        
+        // Detect if video is short based on resolution (portrait/vertical = short)
+        val isShort = explicitlyMarkedShort || isPortraitVideo(file.absolutePath)
         
         return Video(
             id = "local_${file.name.hashCode()}",
@@ -185,12 +197,15 @@ object LocalVideoScanner {
     
     /**
      * Parse video from MediaStore query result
+     * Auto-detects if it's a short based on aspect ratio
      */
     private fun parseVideoFromMediaStore(uri: Uri, displayName: String, durationMs: Long): Video? {
         val fileName = displayName.substringBeforeLast('.')
-        val isShort = fileName.startsWith("[Short]", ignoreCase = true)
         
-        val cleanName = if (isShort) {
+        // Check if explicitly marked as short in filename
+        val explicitlyMarkedShort = fileName.startsWith("[Short]", ignoreCase = true)
+        
+        val cleanName = if (explicitlyMarkedShort) {
             fileName.removePrefix("[Short]").trim()
         } else {
             fileName
@@ -199,6 +214,9 @@ object LocalVideoScanner {
         val parts = cleanName.split(" - ")
         val title = parts.getOrNull(0)?.trim() ?: displayName
         val channelName = parts.getOrNull(1)?.trim() ?: "Local Videos"
+        
+        // Detect if video is short based on resolution
+        val isShort = explicitlyMarkedShort || isPortraitVideo(uri.toString())
         
         return Video(
             id = "local_${uri.hashCode()}",
@@ -238,6 +256,54 @@ object LocalVideoScanner {
         } else {
             // Estimate based on file size (very rough)
             "~5:00"
+        }
+    }
+    
+    /**
+     * Check if video is portrait/vertical (aspect ratio < 1 = portrait = short)
+     * Returns true if height > width
+     */
+    private fun isPortraitVideo(videoPath: String): Boolean {
+        var retriever: MediaMetadataRetriever? = null
+        try {
+            retriever = MediaMetadataRetriever()
+            
+            // Handle both file paths and content URIs
+            if (videoPath.startsWith("content://") || videoPath.startsWith("file://")) {
+                retriever.setDataSource(videoPath)
+            } else {
+                retriever.setDataSource(videoPath)
+            }
+            
+            val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull() ?: 0
+            val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull() ?: 0
+            val rotation = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0
+            
+            // Adjust for rotation (90 or 270 degrees means width/height are swapped)
+            val actualWidth = if (rotation == 90 || rotation == 270) height else width
+            val actualHeight = if (rotation == 90 || rotation == 270) width else height
+            
+            if (actualWidth > 0 && actualHeight > 0) {
+                val aspectRatio = actualWidth.toFloat() / actualHeight.toFloat()
+                val isPortrait = aspectRatio < 1.0f
+                
+                println("📐 Video resolution: ${actualWidth}x${actualHeight}, aspect ratio: ${"%.2f".format(aspectRatio)}, is ${if (isPortrait) "PORTRAIT (Short)" else "LANDSCAPE (Regular)"}")
+                
+                return isPortrait
+            }
+            
+            println("⚠️ Could not determine video resolution for: $videoPath")
+            return false // Default to landscape if can't determine
+            
+        } catch (e: Exception) {
+            println("❌ Error reading video metadata: ${e.message}")
+            return false // Default to landscape on error
+        } finally {
+            try {
+                retriever?.release()
+            } catch (e: Exception) {
+                // Ignore release errors
+            }
         }
     }
 }

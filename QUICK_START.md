@@ -37,11 +37,20 @@ Download the latest APK from GitHub releases and install.
 
 ## 📝 File Naming Rules
 
-| Format | Example | Result |
-|--------|---------|--------|
-| `Title - Channel.mp4` | `ABC Song - Learning.mp4` | Regular video |
-| `[Short] Title - Channel.mp4` | `[Short] Dance - Kids.mp4` | Shows in Shorts |
-| `Just Title.mp4` | `MyVideo.mp4` | Works, channel shows as "Local Videos" |
+| Format | Example | Resolution | Result |
+|--------|---------|------------|--------|
+| `Title - Channel.mp4` | `ABC Song - Learning.mp4` | 1920x1080 (landscape) | Home tab |
+| `Title - Channel.mp4` | `Dance Time - Kids.mp4` | 1080x1920 (portrait) | Shorts tab |
+| `[Short] Title - Channel.mp4` | `[Short] ABC - Kids.mp4` | Any resolution | Forces Shorts tab |
+| `Just Title.mp4` | `MyVideo.mp4` | Any | Auto-detected by resolution |
+
+### 🎯 **Smart Detection**
+
+The app **automatically detects shorts** based on video resolution:
+- **Portrait/Vertical** (9:16, 9:18, etc.) → Shorts tab
+- **Landscape/Horizontal** (16:9, 4:3, etc.) → Home tab
+
+You don't need to manually mark videos as shorts - just name them normally!
 
 ---
 
@@ -126,17 +135,19 @@ When you first open the app:
 
 ```
 /Internal Storage/Movies/KidsVideos/
-├── ABC Song - Learning Time.mp4 (45MB, 3:20)
-├── Happy Birthday - Rhymes.mp4 (38MB, 2:45)
-├── [Short] Dance Moves - Kids Fun.mp4 (12MB, 0:45)
-├── [Short] Color Song - Toddlers.mp4 (15MB, 1:00)
-├── Nursery Rhymes Collection - Baby Songs.mp4 (82MB, 8:15)
-└── Animal Sounds - Educational.mp4 (55MB, 4:30)
+├── ABC Song - Learning Time.mp4 (1920x1080, 45MB, 3:20) → Home
+├── Happy Birthday - Rhymes.mp4 (1280x720, 38MB, 2:45) → Home
+├── Dance Moves - Kids Fun.mp4 (1080x1920, 12MB, 0:45) → Shorts (portrait)
+├── Color Song - Toddlers.mp4 (1080x1920, 15MB, 1:00) → Shorts (portrait)
+├── Nursery Rhymes Collection - Baby Songs.mp4 (1920x1080, 82MB, 8:15) → Home
+└── Animal Sounds - Educational.mp4 (1280x720, 55MB, 4:30) → Home
 ```
 
 App will show:
-- **Home tab**: 4 regular videos
-- **Shorts tab**: 2 short videos
+- **Home tab**: 4 regular videos (all landscape)
+- **Shorts tab**: 2 short videos (all portrait)
+
+**Auto-detection based on aspect ratio!**
 
 ---
 

@@ -18,19 +18,35 @@ The app now plays videos directly from your device's storage - no internet requi
 
 ### 📝 File Naming Examples
 
-**Regular Videos:**
+**Regular Videos (Landscape/Horizontal - 16:9, 4:3, etc.):**
 ```
 Happy Birthday Song - Kids Rhymes.mp4
 ABC Learning - Educational Channel.mp4
 Nursery Rhyme Collection - Baby Songs.mp4
 ```
 
-**Short Videos:**
+**Short Videos (Portrait/Vertical - 9:16, etc.):**
+```
+Dance Time - Fun Kids.mp4
+Animal Sounds - Learning Time.mp4
+Color Song - Toddler Fun.mp4
+```
+
+**Optional: Explicitly mark as Short:**
 ```
 [Short] Quick Dance - Fun Kids.mp4
-[Short] Animal Sounds - Learning Time.mp4
 [Short] Color Song - Toddler Fun.mp4
 ```
+
+### 🎯 **Automatic Detection**
+
+The app **automatically detects** if a video is a short based on its **aspect ratio**:
+- **Portrait/Vertical** (height > width, e.g., 1080x1920) → **Shorts tab**
+- **Landscape/Horizontal** (width > height, e.g., 1920x1080) → **Home tab**
+
+**You don't need to add `[Short]` to filenames!** The app reads video resolution and categorizes automatically.
+
+However, you can still use `[Short]` prefix to force a video into Shorts tab regardless of resolution.
 
 ### 📂 Folder Location
 
@@ -51,13 +67,14 @@ The app looks for videos in these locations (in order):
 
 ### 📊 How File Names Become Metadata
 
-The app parses your filename to extract information:
+The app parses your filename and video properties to extract information:
 
-| Filename | Title | Channel | Type |
-|----------|-------|---------|------|
-| `Happy Birthday - Kids Rhymes.mp4` | Happy Birthday | Kids Rhymes | Regular |
-| `[Short] Dance Time - Fun Videos.mp4` | Dance Time | Fun Videos | Short |
-| `MyVideo.mp4` | MyVideo | Local Videos | Regular |
+| Filename | Resolution | Title | Channel | Goes To |
+|----------|-----------|-------|---------|---------|
+| `Happy Birthday - Kids.mp4` | 1920x1080 | Happy Birthday | Kids | Home (landscape) |
+| `Dance Time - Fun.mp4` | 1080x1920 | Dance Time | Fun | Shorts (portrait) |
+| `[Short] ABC - Learning.mp4` | 1920x1080 | ABC | Learning | Shorts (forced) |
+| `MyVideo.mp4` | 1280x720 | MyVideo | Local Videos | Home (landscape) |
 
 ### 🔄 Refreshing Video List
 
