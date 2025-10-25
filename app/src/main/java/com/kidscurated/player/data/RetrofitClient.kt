@@ -12,6 +12,15 @@ object RetrofitClient {
         level = HttpLoggingInterceptor.Level.BODY
     }
     
+    private val debugInterceptor = Interceptor { chain ->
+        val request = chain.request()
+        println("🌐 API Request: ${request.method} ${request.url}")
+        println("🔑 Headers: ${request.headers}")
+        val response = chain.proceed(request)
+        println("📥 Response Code: ${response.code}")
+        response
+    }
+    
     private val authInterceptor = Interceptor { chain ->
         val request = chain.request().newBuilder()
             .addHeader("apikey", SupabaseConfig.SUPABASE_ANON_KEY)
@@ -21,6 +30,7 @@ object RetrofitClient {
     }
     
     private val okHttpClient = OkHttpClient.Builder()
+        .addInterceptor(debugInterceptor)
         .addInterceptor(authInterceptor)
         .addInterceptor(loggingInterceptor)
         .build()

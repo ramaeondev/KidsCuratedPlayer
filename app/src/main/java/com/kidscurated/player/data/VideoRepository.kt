@@ -41,11 +41,18 @@ object VideoRepository {
         return withContext(Dispatchers.IO) {
             try {
                 println("📡 Fetching regular videos from Supabase...")
+                println("🔗 API URL: ${RetrofitClient.supabaseService::class.java}")
                 val supabaseVideos = RetrofitClient.supabaseService.getRegularVideos()
                 println("✅ Received ${supabaseVideos.size} videos from Supabase")
-                supabaseVideos.map { it.toVideo() }
+                if (supabaseVideos.isNotEmpty()) {
+                    println("📦 First video sample: ${supabaseVideos[0]}")
+                }
+                val converted = supabaseVideos.map { it.toVideo() }
+                println("🔄 Converted ${converted.size} videos")
+                converted
             } catch (e: Exception) {
-                println("❌ Error fetching videos: ${e.message}")
+                println("❌ Error fetching videos: ${e.javaClass.simpleName}: ${e.message}")
+                println("❌ Stack trace:")
                 e.printStackTrace()
                 emptyList()
             }
@@ -59,9 +66,15 @@ object VideoRepository {
                 println("📡 Fetching shorts from Supabase...")
                 val supabaseVideos = RetrofitClient.supabaseService.getShorts()
                 println("✅ Received ${supabaseVideos.size} shorts from Supabase")
-                supabaseVideos.map { it.toVideo() }
+                if (supabaseVideos.isNotEmpty()) {
+                    println("📦 First short sample: ${supabaseVideos[0]}")
+                }
+                val converted = supabaseVideos.map { it.toVideo() }
+                println("🔄 Converted ${converted.size} shorts")
+                converted
             } catch (e: Exception) {
-                println("❌ Error fetching shorts: ${e.message}")
+                println("❌ Error fetching shorts: ${e.javaClass.simpleName}: ${e.message}")
+                println("❌ Stack trace:")
                 e.printStackTrace()
                 emptyList()
             }
