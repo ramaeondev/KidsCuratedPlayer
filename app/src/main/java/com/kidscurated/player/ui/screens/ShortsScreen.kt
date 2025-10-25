@@ -35,10 +35,17 @@ fun ShortsScreen(navController: NavController) {
         scope.launch {
             try {
                 isLoading = true
+                println("📱 ShortsScreen: Fetching shorts...")
                 shorts = VideoRepository.getAllShorts()
-                errorMessage = null
+                println("📱 ShortsScreen: Received ${shorts.size} shorts")
+                if (shorts.isEmpty()) {
+                    errorMessage = "No shorts found. Please check:\n1. Supabase table created?\n2. RLS policies enabled?\n3. Data inserted?"
+                } else {
+                    errorMessage = null
+                }
             } catch (e: Exception) {
-                errorMessage = e.message
+                println("📱 ShortsScreen: Error - ${e.message}")
+                errorMessage = "Error: ${e.message}"
             } finally {
                 isLoading = false
             }

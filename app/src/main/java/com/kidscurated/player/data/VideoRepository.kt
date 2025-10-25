@@ -40,9 +40,12 @@ object VideoRepository {
     suspend fun fetchRegularVideosFromSupabase(): List<Video> {
         return withContext(Dispatchers.IO) {
             try {
+                println("📡 Fetching regular videos from Supabase...")
                 val supabaseVideos = RetrofitClient.supabaseService.getRegularVideos()
+                println("✅ Received ${supabaseVideos.size} videos from Supabase")
                 supabaseVideos.map { it.toVideo() }
             } catch (e: Exception) {
+                println("❌ Error fetching videos: ${e.message}")
                 e.printStackTrace()
                 emptyList()
             }
@@ -53,9 +56,12 @@ object VideoRepository {
     suspend fun fetchShortsFromSupabase(): List<Video> {
         return withContext(Dispatchers.IO) {
             try {
+                println("📡 Fetching shorts from Supabase...")
                 val supabaseVideos = RetrofitClient.supabaseService.getShorts()
+                println("✅ Received ${supabaseVideos.size} shorts from Supabase")
                 supabaseVideos.map { it.toVideo() }
             } catch (e: Exception) {
+                println("❌ Error fetching shorts: ${e.message}")
                 e.printStackTrace()
                 emptyList()
             }

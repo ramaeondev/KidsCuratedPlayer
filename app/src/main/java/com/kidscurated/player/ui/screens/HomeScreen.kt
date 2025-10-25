@@ -37,10 +37,17 @@ fun HomeScreen(navController: NavController) {
         scope.launch {
             try {
                 isLoading = true
+                println("🏠 HomeScreen: Fetching videos...")
                 videos = VideoRepository.getAllVideos()
-                errorMessage = null
+                println("🏠 HomeScreen: Received ${videos.size} videos")
+                if (videos.isEmpty()) {
+                    errorMessage = "No videos found. Please check:\n1. Supabase table created?\n2. RLS policies enabled?\n3. Data inserted?"
+                } else {
+                    errorMessage = null
+                }
             } catch (e: Exception) {
-                errorMessage = e.message
+                println("🏠 HomeScreen: Error - ${e.message}")
+                errorMessage = "Error: ${e.message}"
             } finally {
                 isLoading = false
             }
