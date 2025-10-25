@@ -23,6 +23,8 @@ ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
 
 -- Step 3: Create policy to allow public read access (IMPORTANT!)
 -- This allows the app to read data without authentication
+-- Drop existing policy if it exists, then create it
+DROP POLICY IF EXISTS "Allow public read access" ON videos;
 CREATE POLICY "Allow public read access" 
 ON videos 
 FOR SELECT 
@@ -35,6 +37,7 @@ USING (true);
 -- CREATE POLICY "Allow authenticated delete" ON videos FOR DELETE USING (auth.role() = 'authenticated');
 
 -- Step 5: Insert sample Telugu rhyme videos (10 regular videos)
+-- Using INSERT ... ON CONFLICT to avoid duplicate key errors
 INSERT INTO videos (id, title, channelName, thumbnailUrl, views, uploadTime, duration, youtubeUrl, isShort) VALUES
 ('VMXHQRLRywY', 'Top 25 Telugu Rhymes for Children - Infobells', 'infobells - Telugu', 'https://img.youtube.com/vi/VMXHQRLRywY/maxresdefault.jpg', '19 crore views', '9 years ago', '25:12', 'https://www.youtube.com/watch?v=VMXHQRLRywY', false),
 ('giVecL2ANv8', 'Dam Dam Dam - 3D Animation Telugu Rhymes for Children', 'CVS 3D Rhymes & Kids Songs', 'https://img.youtube.com/vi/giVecL2ANv8/maxresdefault.jpg', '33 crore views', '12 years ago', '3:08', 'https://www.youtube.com/watch?v=giVecL2ANv8', false),
@@ -45,9 +48,11 @@ INSERT INTO videos (id, title, channelName, thumbnailUrl, views, uploadTime, dur
 ('4TpW-Qfjd-0', 'Chitti Chilakamma Amma Kottinda | Telugu Rhymes for Children | Infobells', 'infobells - Telugu', 'https://img.youtube.com/vi/4TpW-Qfjd-0/maxresdefault.jpg', '32 crore views', '2 years ago', '5:57', 'https://www.youtube.com/watch?v=4TpW-Qfjd-0', false),
 ('RqLstPFSJ0o', 'జామ చెట్టు | Telugu Rhymes for Children by infobells', 'infobells - Telugu', 'https://img.youtube.com/vi/RqLstPFSJ0o/maxresdefault.jpg', '7.1 crore views', '9 years ago', '1:00', 'https://www.youtube.com/watch?v=RqLstPFSJ0o', false),
 ('0F6WRYemPRE', 'Gundrani Gundrati Laddu | Telugu Rhymes for Children | Infobells', 'infobells - Telugu', 'https://img.youtube.com/vi/0F6WRYemPRE/maxresdefault.jpg', '84 crore views', '2 years ago', '3:14', 'https://www.youtube.com/watch?v=0F6WRYemPRE', false),
-('2kUaylNjr4M', 'Telugu Rhymes for Children | 27 Telugu Nursery Rhymes Collection | Telugu Baby Songs', 'CVS 3D Rhymes & Kids Songs', 'https://img.youtube.com/vi/2kUaylNjr4M/maxresdefault.jpg', '30 crore views', '9 years ago', '31:43', 'https://www.youtube.com/watch?v=2kUaylNjr4M', false);
+('2kUaylNjr4M', 'Telugu Rhymes for Children | 27 Telugu Nursery Rhymes Collection | Telugu Baby Songs', 'CVS 3D Rhymes & Kids Songs', 'https://img.youtube.com/vi/2kUaylNjr4M/maxresdefault.jpg', '30 crore views', '9 years ago', '31:43', 'https://www.youtube.com/watch?v=2kUaylNjr4M', false)
+ON CONFLICT (id) DO NOTHING;
 
 -- Step 6: Insert sample Telugu rhyme shorts (10 shorts)
+-- Using INSERT ... ON CONFLICT to avoid duplicate key errors
 INSERT INTO videos (id, title, channelName, thumbnailUrl, views, uploadTime, duration, youtubeUrl, isShort) VALUES
 ('yvoLY8U0IU4', 'Kaki Kaki Kadavala Kaki | Telugu Rhymes & Kids Songs | Infobells', 'infobells - Telugu', 'https://img.youtube.com/vi/yvoLY8U0IU4/maxresdefault.jpg', '1.3 crore views', 'Recent', '0:60', 'https://www.youtube.com/shorts/yvoLY8U0IU4', true),
 ('nlOeOkkFDic', 'Telugu Kids Rhymes | Enugamma Enugu | #telugurhymes - Infobells', 'infobells - Telugu', 'https://img.youtube.com/vi/nlOeOkkFDic/maxresdefault.jpg', '49 lakh views', 'Recent', '0:60', 'https://www.youtube.com/shorts/nlOeOkkFDic', true),
@@ -58,7 +63,8 @@ INSERT INTO videos (id, title, channelName, thumbnailUrl, views, uploadTime, dur
 ('wTXwh9rXJKU', 'చిట్టి చిలకమ్మ | Chitti Chilakamma | Telugu Rhymes For Children | Kidsone Telugu', 'Kidsone Telugu', 'https://img.youtube.com/vi/wTXwh9rXJKU/maxresdefault.jpg', '31 lakh views', 'Recent', '0:60', 'https://www.youtube.com/shorts/wTXwh9rXJKU', true),
 ('z_O5EhnLFZU', 'Holi Vaccindi - Holi Song | Telugu Rhymes | infobells', 'infobells - Telugu', 'https://img.youtube.com/vi/z_O5EhnLFZU/maxresdefault.jpg', '13 crore views', 'Recent', '0:60', 'https://www.youtube.com/shorts/z_O5EhnLFZU', true),
 ('qTHpKwGTtMw', 'Bath Song Part 1 Telugu Shorts | Baby Ronnie | Minnu and Mintu Telugu Nursery Rhyme', 'Videogyan Telugu - Nursery Rhymes & Kids Songs', 'https://img.youtube.com/vi/qTHpKwGTtMw/maxresdefault.jpg', '79 crore views', 'Recent', '0:60', 'https://www.youtube.com/shorts/qTHpKwGTtMw', true),
-('v3UWXUK1dRA', 'Chitti Chilakamma - Parrot Song | Butta Bomma Telugu Babies Rhymes', 'Butta Bomma Telugu Babies Rhymes', 'https://img.youtube.com/vi/v3UWXUK1dRA/maxresdefault.jpg', '54 lakh views', 'Recent', '0:60', 'https://www.youtube.com/shorts/v3UWXUK1dRA', true);
+('v3UWXUK1dRA', 'Chitti Chilakamma - Parrot Song | Butta Bomma Telugu Babies Rhymes', 'Butta Bomma Telugu Babies Rhymes', 'https://img.youtube.com/vi/v3UWXUK1dRA/maxresdefault.jpg', '54 lakh views', 'Recent', '0:60', 'https://www.youtube.com/shorts/v3UWXUK1dRA', true)
+ON CONFLICT (id) DO NOTHING;
 
 -- Step 7: Verify the data was inserted
 SELECT COUNT(*) as total_videos, 
