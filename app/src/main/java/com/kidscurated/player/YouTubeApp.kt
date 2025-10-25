@@ -121,7 +121,7 @@ fun YouTubeApp() {
                 ShortsScreen(navController)
             }
             composable(Screen.Library.route) {
-                LibraryScreen()
+                LibraryScreen(navController)
             }
             composable("video_player/{videoId}") { backStackEntry ->
                 val videoId = backStackEntry.arguments?.getString("videoId")

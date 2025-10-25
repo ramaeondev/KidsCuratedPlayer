@@ -5,9 +5,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -47,7 +49,7 @@ fun VideoItem(video: Video, onClick: () -> Unit) {
             .clickable(onClick = onClick)
             .padding(bottom = 16.dp)
     ) {
-        // Thumbnail
+        // Thumbnail with Play Button Overlay (YouTube Style)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -60,6 +62,24 @@ fun VideoItem(video: Video, onClick: () -> Unit) {
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
+            
+            // YouTube-style Play Button in Center
+            Surface(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(64.dp),
+                color = Color.Red.copy(alpha = 0.9f),
+                shape = CircleShape
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "Play",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                )
+            }
             
             // Duration badge
             Surface(

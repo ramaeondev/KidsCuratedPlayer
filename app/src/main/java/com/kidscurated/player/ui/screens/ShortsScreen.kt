@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -56,6 +57,24 @@ fun ShortItem(video: Video, onClick: () -> Unit) {
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
+        
+        // YouTube-style Play Button in Center
+        Surface(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(80.dp),
+            color = Color.Red.copy(alpha = 0.9f),
+            shape = CircleShape
+        ) {
+            Icon(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = "Play",
+                tint = Color.White,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp)
+            )
+        }
         
         // Gradient overlay at bottom
         Box(
