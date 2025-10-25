@@ -71,47 +71,37 @@ fun VideoPlayerScreen(videoId: String, navController: NavController) {
                         settings.loadWithOverviewMode = true
                         settings.useWideViewPort = true
                         
-                        // Use mobile user agent only for shorts
-                        if (isShort) {
-                            settings.userAgentString = "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
-                        }
+                        // Use mobile user agent for all videos to fix playback issues
+                        settings.userAgentString = "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
                         
                         webChromeClient = WebChromeClient()
-                        webViewClient = WebViewClient()
                         
-                        // For shorts, use the mobile YouTube URL; for videos, use iframe embed
+                        // Custom WebViewClient to prevent navigation away from our video
+                        webViewClient = object : WebViewClient() {
+                            override fun shouldOverrideUrlLoading(
+                                view: WebView?,
+                                request: android.webkit.WebResourceRequest?
+                            ): Boolean {
+                                val url = request?.url?.toString() ?: return false
+                                
+                                // Allow loading our specific video URLs
+                                if (url.contains("youtube.com/shorts/$videoId") ||
+                                    url.contains("youtube.com/embed/$videoId") ||
+                                    url.contains("youtube.com/watch?v=$videoId")) {
+                                    return false // Allow loading
+                                }
+                                
+                                // Block any other navigation (prevents scrolling to other YouTube videos)
+                                return true // Block loading
+                            }
+                        }
+                        
+                        // For shorts, use the mobile YouTube URL; for videos, try mobile watch URL
                         if (isShort) {
                             loadUrl("https://m.youtube.com/shorts/$videoId")
                         } else {
-                            // Use HTML iframe for better compatibility with regular videos
-                            val iframeHtml = """
-                                <!DOCTYPE html>
-                                <html>
-                                <head>
-                                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                    <style>
-                                        body { margin: 0; padding: 0; background: black; }
-                                        iframe { border: none; }
-                                    </style>
-                                </head>
-                                <body>
-                                    <iframe 
-                                        width="100%" 
-                                        height="100%" 
-                                        src="https://www.youtube.com/embed/$videoId?autoplay=1&playsinline=1&controls=1&rel=0&modestbranding=1"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowfullscreen>
-                                    </iframe>
-                                </body>
-                                </html>
-                            """.trimIndent()
-                            loadDataWithBaseURL(
-                                "https://www.youtube.com",
-                                iframeHtml,
-                                "text/html",
-                                "utf-8",
-                                null
-                            )
+                            // Use mobile watch URL instead of embed to fix Error Code 15
+                            loadUrl("https://m.youtube.com/watch?v=$videoId")
                         }
                     }
                 },

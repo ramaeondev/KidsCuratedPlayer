@@ -15,8 +15,12 @@ CREATE TABLE IF NOT EXISTS videos (
     duration TEXT NOT NULL,
     youtubeUrl TEXT NOT NULL,
     isShort BOOLEAN NOT NULL DEFAULT false,
+    isSkipped BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Add isSkipped column if table already exists (for existing databases)
+ALTER TABLE videos ADD COLUMN IF NOT EXISTS isSkipped BOOLEAN NOT NULL DEFAULT false;
 
 -- Step 2: Enable Row Level Security (RLS)
 ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
