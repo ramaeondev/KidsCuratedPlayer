@@ -8,7 +8,8 @@ data class Video(
     val views: String,
     val uploadTime: String,
     val duration: String,
-    val youtubeUrl: String
+    val youtubeUrl: String,
+    val isShort: Boolean = false
 )
 
 object VideoRepository {
@@ -127,7 +128,8 @@ object VideoRepository {
             views = "1.3 crore views",
             uploadTime = "Recent",
             duration = "0:60",
-            youtubeUrl = "https://www.youtube.com/shorts/yvoLY8U0IU4"
+            youtubeUrl = "https://www.youtube.com/shorts/yvoLY8U0IU4",
+            isShort = true
         ),
         Video(
             id = "nlOeOkkFDic",
@@ -137,7 +139,8 @@ object VideoRepository {
             views = "49 lakh views",
             uploadTime = "Recent",
             duration = "0:60",
-            youtubeUrl = "https://www.youtube.com/shorts/nlOeOkkFDic"
+            youtubeUrl = "https://www.youtube.com/shorts/nlOeOkkFDic",
+            isShort = true
         ),
         Video(
             id = "twalaOG9CGk",
@@ -147,7 +150,8 @@ object VideoRepository {
             views = "1 crore views",
             uploadTime = "Recent",
             duration = "0:60",
-            youtubeUrl = "https://www.youtube.com/shorts/twalaOG9CGk"
+            youtubeUrl = "https://www.youtube.com/shorts/twalaOG9CGk",
+            isShort = true
         ),
         Video(
             id = "nB5XtiJIRN4",
@@ -157,7 +161,8 @@ object VideoRepository {
             views = "1.2 crore views",
             uploadTime = "Recent",
             duration = "0:60",
-            youtubeUrl = "https://www.youtube.com/shorts/nB5XtiJIRN4"
+            youtubeUrl = "https://www.youtube.com/shorts/nB5XtiJIRN4",
+            isShort = true
         ),
         Video(
             id = "ZDJ-dMkf7Ng",
@@ -167,7 +172,8 @@ object VideoRepository {
             views = "2.1 crore views",
             uploadTime = "Recent",
             duration = "0:60",
-            youtubeUrl = "https://www.youtube.com/shorts/ZDJ-dMkf7Ng"
+            youtubeUrl = "https://www.youtube.com/shorts/ZDJ-dMkf7Ng",
+            isShort = true
         ),
         Video(
             id = "7dnIde8lgrk",
@@ -177,7 +183,8 @@ object VideoRepository {
             views = "90K views",
             uploadTime = "Recent",
             duration = "0:60",
-            youtubeUrl = "https://www.youtube.com/shorts/7dnIde8lgrk"
+            youtubeUrl = "https://www.youtube.com/shorts/7dnIde8lgrk",
+            isShort = true
         ),
         Video(
             id = "wTXwh9rXJKU",
@@ -187,7 +194,8 @@ object VideoRepository {
             views = "31 lakh views",
             uploadTime = "Recent",
             duration = "0:60",
-            youtubeUrl = "https://www.youtube.com/shorts/wTXwh9rXJKU"
+            youtubeUrl = "https://www.youtube.com/shorts/wTXwh9rXJKU",
+            isShort = true
         ),
         Video(
             id = "z_O5EhnLFZU",
@@ -197,7 +205,8 @@ object VideoRepository {
             views = "13 crore views",
             uploadTime = "Recent",
             duration = "0:60",
-            youtubeUrl = "https://www.youtube.com/shorts/z_O5EhnLFZU"
+            youtubeUrl = "https://www.youtube.com/shorts/z_O5EhnLFZU",
+            isShort = true
         ),
         Video(
             id = "qTHpKwGTtMw",
@@ -207,7 +216,8 @@ object VideoRepository {
             views = "79 crore views",
             uploadTime = "Recent",
             duration = "0:60",
-            youtubeUrl = "https://www.youtube.com/shorts/qTHpKwGTtMw"
+            youtubeUrl = "https://www.youtube.com/shorts/qTHpKwGTtMw",
+            isShort = true
         ),
         Video(
             id = "v3UWXUK1dRA",
@@ -217,7 +227,8 @@ object VideoRepository {
             views = "54 lakh views",
             uploadTime = "Recent",
             duration = "0:60",
-            youtubeUrl = "https://www.youtube.com/shorts/v3UWXUK1dRA"
+            youtubeUrl = "https://www.youtube.com/shorts/v3UWXUK1dRA",
+            isShort = true
         )
     )
     

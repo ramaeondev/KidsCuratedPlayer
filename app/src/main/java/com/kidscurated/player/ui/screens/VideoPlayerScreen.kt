@@ -25,6 +25,7 @@ import com.kidscurated.player.data.VideoRepository
 fun VideoPlayerScreen(videoId: String, navController: NavController) {
     val video = VideoRepository.getVideoById(videoId)
     val context = LocalContext.current
+    val isShort = video?.isShort == true
     
     Column(
         modifier = Modifier
@@ -44,11 +45,17 @@ fun VideoPlayerScreen(videoId: String, navController: NavController) {
             )
         }
         
-        // YouTube Player
+        // YouTube Player - Full screen for shorts, 16:9 for regular videos
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(16f / 9f)
+                .then(
+                    if (isShort) {
+                        Modifier.fillMaxHeight()  // Full screen for shorts
+                    } else {
+                        Modifier.aspectRatio(16f / 9f)  // 16:9 for regular videos
+                    }
+                )
                 .background(Color.Black)
         ) {
             AndroidView(
@@ -72,15 +79,16 @@ fun VideoPlayerScreen(videoId: String, navController: NavController) {
             )
         }
         
-        // Video details
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .background(Color.Black)
-        ) {
-            item {
-                // Video title and info
+        // Video details - Only show for regular videos, not shorts
+        if (!isShort) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .background(Color.Black)
+            ) {
+                item {
+                    // Video title and info
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -192,6 +200,7 @@ fun VideoPlayerScreen(videoId: String, navController: NavController) {
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(16.dp)
                 )
+            }
             }
         }
     }
