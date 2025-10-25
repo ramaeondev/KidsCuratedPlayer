@@ -17,11 +17,11 @@ interface SupabaseService {
 data class SupabaseVideo(
     val id: String,
     val title: String,
-    val channelName: String,
-    val thumbnailUrl: String,
+    val channelname: String,  // Changed from channelName to match DB column
+    val thumbnailurl: String,  // Changed from thumbnailUrl to match DB column
     val views: String,
-    val uploadTime: String,
+    val uploadtime: String,  // Changed from uploadTime to match DB column
     val duration: String,
-    val youtubeUrl: String,
-    val isShort: Boolean
+    val youtubeurl: String,  // Changed from youtubeUrl to match DB column
+    val isshort: Boolean  // Changed from isShort to match DB column
 )

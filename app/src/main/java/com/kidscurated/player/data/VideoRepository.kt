@@ -107,12 +107,12 @@ fun SupabaseVideo.toVideo(): Video {
     return Video(
         id = this.id,
         title = this.title,
-        channelName = this.channelName,
-        thumbnailUrl = this.thumbnailUrl,
+        channelName = this.channelname,  // Map lowercase to camelCase
+        thumbnailUrl = this.thumbnailurl,  // Map lowercase to camelCase
         views = this.views,
-        uploadTime = this.uploadTime,
+        uploadTime = this.uploadtime,  // Map lowercase to camelCase
         duration = this.duration,
-        youtubeUrl = this.youtubeUrl,
-        isShort = this.isShort
+        youtubeUrl = this.youtubeurl,  // Map lowercase to camelCase
+        isShort = this.isshort  // Map lowercase to camelCase
     )
 }
