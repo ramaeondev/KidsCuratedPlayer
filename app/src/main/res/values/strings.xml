@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Kids Curated Player</string>
+    <string name="home">Home</string>
+    <string name="shorts">Shorts</string>
+    <string name="subscriptions">Library</string>
+    <string name="search">Search</string>
+    <string name="loading">Loading...</string>
+    <string name="play_video">Play Video</string>
+    <string name="pause_video">Pause Video</string>
+    <string name="video_thumbnail">Video Thumbnail</string>
+    <string name="channel_icon">Channel Icon</string>
+    <string name="no_videos">No videos available</string>
+    <string name="error_loading">Error loading video</string>
+</resources>
