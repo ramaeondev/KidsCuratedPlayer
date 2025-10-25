@@ -79,13 +79,40 @@ fun VideoPlayerScreen(videoId: String, navController: NavController) {
                         webChromeClient = WebChromeClient()
                         webViewClient = WebViewClient()
                         
-                        // For shorts, use the mobile YouTube URL; for videos, use embed
-                        val playUrl = if (isShort) {
-                            "https://m.youtube.com/shorts/$videoId"
+                        // For shorts, use the mobile YouTube URL; for videos, use iframe embed
+                        if (isShort) {
+                            loadUrl("https://m.youtube.com/shorts/$videoId")
                         } else {
-                            "https://www.youtube.com/embed/$videoId?autoplay=1&controls=1&showinfo=0&rel=0&modestbranding=1"
+                            // Use HTML iframe for better compatibility with regular videos
+                            val iframeHtml = """
+                                <!DOCTYPE html>
+                                <html>
+                                <head>
+                                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                    <style>
+                                        body { margin: 0; padding: 0; background: black; }
+                                        iframe { border: none; }
+                                    </style>
+                                </head>
+                                <body>
+                                    <iframe 
+                                        width="100%" 
+                                        height="100%" 
+                                        src="https://www.youtube.com/embed/$videoId?autoplay=1&playsinline=1&controls=1&rel=0&modestbranding=1"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowfullscreen>
+                                    </iframe>
+                                </body>
+                                </html>
+                            """.trimIndent()
+                            loadDataWithBaseURL(
+                                "https://www.youtube.com",
+                                iframeHtml,
+                                "text/html",
+                                "utf-8",
+                                null
+                            )
                         }
-                        loadUrl(playUrl)
                     }
                 },
                 modifier = Modifier.fillMaxSize()
