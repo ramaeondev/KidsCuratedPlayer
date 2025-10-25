@@ -10,7 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,22 +21,58 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.kidscurated.player.data.Video
 import com.kidscurated.player.data.VideoRepository
+import kotlinx.coroutines.launch
 
 @Composable
 fun ShortsScreen(navController: NavController) {
-    val shorts = VideoRepository.getAllShorts()
+    var shorts by remember { mutableStateOf<List<Video>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
     
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(vertical = 8.dp)
-    ) {
-        items(shorts) { short ->
-            ShortItem(video = short, onClick = {
-                navController.navigate("video_player/${short.id}")
-            })
+    // Fetch shorts on first composition
+    LaunchedEffect(Unit) {
+        scope.launch {
+            try {
+                isLoading = true
+                shorts = VideoRepository.getAllShorts()
+                errorMessage = null
+            } catch (e: Exception) {
+                errorMessage = e.message
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+    
+    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+        when {
+            isLoading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = Color.Red
+                )
+            }
+            errorMessage != null -> {
+                Text(
+                    text = "Error: $errorMessage",
+                    color = Color.White,
+                    modifier = Modifier.align(Alignment.Center).padding(16.dp)
+                )
+            }
+            else -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(vertical = 8.dp)
+                ) {
+                    items(shorts) { short ->
+                        ShortItem(video = short, onClick = {
+                            navController.navigate("video_player/${short.id}")
+                        })
+                    }
+                }
+            }
         }
     }
 }

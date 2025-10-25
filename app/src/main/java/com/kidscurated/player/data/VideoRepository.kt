@@ -1,5 +1,8 @@
 package com.kidscurated.player.data
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
 data class Video(
     val id: String,
     val title: String,
@@ -13,10 +16,89 @@ data class Video(
 )
 
 object VideoRepository {
-    // Curated Telugu Rhymes for Children
+    // Cache for fetched videos
+    private var cachedVideos: List<Video>? = null
+    private var cachedShorts: List<Video>? = null
+    private var lastFetchTime: Long = 0
+    private const val CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+    
+    // Fetch videos from Supabase
+    suspend fun fetchVideosFromSupabase(): List<Video> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val supabaseVideos = RetrofitClient.supabaseService.getVideos()
+                supabaseVideos.map { it.toVideo() }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Return local fallback data if API fails
+                localCuratedVideos + localCuratedShorts
+            }
+        }
+    }
+    
+    // Fetch only regular videos
+    suspend fun fetchRegularVideosFromSupabase(): List<Video> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val supabaseVideos = RetrofitClient.supabaseService.getRegularVideos()
+                supabaseVideos.map { it.toVideo() }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                localCuratedVideos
+            }
+        }
+    }
+    
+    // Fetch only shorts
+    suspend fun fetchShortsFromSupabase(): List<Video> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val supabaseVideos = RetrofitClient.supabaseService.getShorts()
+                supabaseVideos.map { it.toVideo() }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                localCuratedShorts
+            }
+        }
+    }
+    
+    // Get all videos with caching
+    suspend fun getAllVideos(): List<Video> {
+        val currentTime = System.currentTimeMillis()
+        if (cachedVideos == null || currentTime - lastFetchTime > CACHE_DURATION) {
+            cachedVideos = fetchRegularVideosFromSupabase()
+            lastFetchTime = currentTime
+        }
+        return cachedVideos ?: localCuratedVideos
+    }
+    
+    // Get all shorts with caching
+    suspend fun getAllShorts(): List<Video> {
+        val currentTime = System.currentTimeMillis()
+        if (cachedShorts == null || currentTime - lastFetchTime > CACHE_DURATION) {
+            cachedShorts = fetchShortsFromSupabase()
+            lastFetchTime = currentTime
+        }
+        return cachedShorts ?: localCuratedShorts
+    }
+    
+    // Get video by ID
+    fun getVideoById(id: String): Video? {
+        return (cachedVideos ?: localCuratedVideos).find { it.id == id }
+            ?: (cachedShorts ?: localCuratedShorts).find { it.id == id }
+    }
+    
+    // Clear cache (useful for refresh)
+    fun clearCache() {
+        cachedVideos = null
+        cachedShorts = null
+        lastFetchTime = 0
+    }
+    
+    // Curated Telugu Rhymes for Children (Local Fallback Data)
     // These videos are safe, educational, and perfect for kids!
     
-    val curatedVideos = listOf(
+    private val localCuratedVideos = listOf(
         Video(
             id = "VMXHQRLRywY",
             title = "Top 25 Telugu Rhymes for Children - Infobells",
@@ -119,7 +201,7 @@ object VideoRepository {
         )
     )
     
-    val curatedShorts = listOf(
+    private val localCuratedShorts = listOf(
         Video(
             id = "yvoLY8U0IU4",
             title = "Kaki Kaki Kadavala Kaki | Telugu Rhymes & Kids Songs | Infobells",
@@ -231,12 +313,19 @@ object VideoRepository {
             isShort = true
         )
     )
-    
-    fun getVideoById(id: String): Video? {
-        return (curatedVideos + curatedShorts).find { it.id == id }
-    }
-    
-    fun getAllVideos() = curatedVideos
-    
-    fun getAllShorts() = curatedShorts
+}
+
+// Extension function to convert Supabase model to app model
+fun SupabaseVideo.toVideo(): Video {
+    return Video(
+        id = this.id,
+        title = this.title,
+        channelName = this.channelName,
+        thumbnailUrl = this.thumbnailUrl,
+        views = this.views,
+        uploadTime = this.uploadTime,
+        duration = this.duration,
+        youtubeUrl = this.youtubeUrl,
+        isShort = this.isShort
+    )
 }

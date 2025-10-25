@@ -11,7 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,20 +23,56 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.kidscurated.player.data.Video
 import com.kidscurated.player.data.VideoRepository
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(navController: NavController) {
-    val videos = VideoRepository.getAllVideos()
+    var videos by remember { mutableStateOf<List<Video>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
     
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-    ) {
-        items(videos) { video ->
-            VideoItem(video = video, onClick = {
-                navController.navigate("video_player/${video.id}")
-            })
+    // Fetch videos on first composition
+    LaunchedEffect(Unit) {
+        scope.launch {
+            try {
+                isLoading = true
+                videos = VideoRepository.getAllVideos()
+                errorMessage = null
+            } catch (e: Exception) {
+                errorMessage = e.message
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+    
+    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+        when {
+            isLoading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = Color.Red
+                )
+            }
+            errorMessage != null -> {
+                Text(
+                    text = "Error: $errorMessage",
+                    color = Color.White,
+                    modifier = Modifier.align(Alignment.Center).padding(16.dp)
+                )
+            }
+            else -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(videos) { video ->
+                        VideoItem(video = video, onClick = {
+                            navController.navigate("video_player/${video.id}")
+                        })
+                    }
+                }
+            }
         }
     }
 }

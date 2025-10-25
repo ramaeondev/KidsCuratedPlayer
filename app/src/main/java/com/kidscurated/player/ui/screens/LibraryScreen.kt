@@ -24,7 +24,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.kidscurated.player.data.Video
 import com.kidscurated.player.data.VideoRepository
+import kotlinx.coroutines.launch
 
 @Composable
 fun LibraryScreen(navController: NavController? = null) {
@@ -80,16 +82,31 @@ fun LibraryScreen(navController: NavController? = null) {
 
 @Composable
 fun VideosLibrary(navController: NavController?) {
-    val videos = VideoRepository.getAllVideos()
+    var videos by remember { mutableStateOf<List<Video>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
     
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(videos) { video ->
+    LaunchedEffect(Unit) {
+        scope.launch {
+            isLoading = true
+            videos = VideoRepository.getAllVideos()
+            isLoading = false
+        }
+    }
+    
+    if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = Color.Red)
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(videos) { video ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -186,22 +203,38 @@ fun VideosLibrary(navController: NavController?) {
             }
         }
     }
+    }
 }
 
 @Composable
 fun ShortsLibrary(navController: NavController?) {
-    val shorts = VideoRepository.getAllShorts()
+    var shorts by remember { mutableStateOf<List<Video>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
     
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black),
-        contentPadding = PaddingValues(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(shorts) { short ->
+    LaunchedEffect(Unit) {
+        scope.launch {
+            isLoading = true
+            shorts = VideoRepository.getAllShorts()
+            isLoading = false
+        }
+    }
+    
+    if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = Color.Red)
+        }
+    } else {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black),
+            contentPadding = PaddingValues(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(shorts) { short ->
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -268,5 +301,6 @@ fun ShortsLibrary(navController: NavController?) {
                 }
             }
         }
+    }
     }
 }
