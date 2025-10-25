@@ -2,59 +2,79 @@
 
 ## 📱 How to Add Your Own Videos
 
-The app now plays videos directly from your device's storage - no internet required!
+The app plays **ALL videos from your device gallery** - no special folder needed!
 
-### 🎯 Quick Setup
+### 🎯 Super Simple Setup
 
-1. **Connect Phone to Computer** (USB cable)
-2. **Create the Folder**:
-   - Navigate to: `Internal Storage/Movies/`
-   - Create a new folder named: `KidsVideos`
-3. **Copy Videos**: 
-   - Copy your MP4 videos into the `KidsVideos` folder
-4. **Name Your Files** (Important!):
-   - Use this format: `Title - Channel Name.mp4`
-   - For shorts: `[Short] Title - Channel Name.mp4`
+1. **Add videos to your phone** (any method):
+   - Record with camera
+   - Download from anywhere
+   - Transfer via USB, Bluetooth, email, etc.
+   - Already have videos? They'll show automatically!
 
-### 📝 File Naming Examples
+2. **Install the app**
+   - Download APK from GitHub releases
 
-**Regular Videos (Landscape/Horizontal - 16:9, 4:3, etc.):**
+3. **Grant permission**
+   - First launch asks for "Videos" access
+   - Tap **Allow**
+
+4. **Done!** 
+   - App automatically shows ALL your videos
+   - Portrait videos → Shorts tab
+   - Landscape videos → Home tab
+
+**No folders to create. No file renaming required!**
+
+### 📝 Optional: Better Organization
+
+Want to organize your videos with custom names? Use this format:
+
+**Format:** `Title - Channel Name.mp4`
+
+**Examples:**
 ```
 Happy Birthday Song - Kids Rhymes.mp4
 ABC Learning - Educational Channel.mp4
-Nursery Rhyme Collection - Baby Songs.mp4
-```
-
-**Short Videos (Portrait/Vertical - 9:16, etc.):**
-```
 Dance Time - Fun Kids.mp4
-Animal Sounds - Learning Time.mp4
-Color Song - Toddler Fun.mp4
 ```
 
-**Optional: Explicitly mark as Short:**
+The app will extract:
+- **Title**: Shows as video title
+- **Channel**: Groups videos by channel name
+
+**Simple names work too:**
 ```
-[Short] Quick Dance - Fun Kids.mp4
-[Short] Color Song - Toddler Fun.mp4
+MyVideo.mp4
+Birthday.mp4
 ```
+These will show with channel name as "Gallery"
 
 ### 🎯 **Automatic Detection**
 
-The app **automatically detects** if a video is a short based on its **aspect ratio**:
+The app **automatically categorizes ALL your videos**:
 - **Portrait/Vertical** (height > width, e.g., 1080x1920) → **Shorts tab**
 - **Landscape/Horizontal** (width > height, e.g., 1920x1080) → **Home tab**
 
-**You don't need to add `[Short]` to filenames!** The app reads video resolution and categorizes automatically.
+**Works with:**
+- ✅ Videos you recorded on your phone
+- ✅ Downloaded videos
+- ✅ WhatsApp videos
+- ✅ Instagram/TikTok downloaded content
+- ✅ Any video in your gallery
 
-However, you can still use `[Short]` prefix to force a video into Shorts tab regardless of resolution.
+**No folders. No renaming. Just works!**
 
-### 📂 Folder Location
+### 📂 Where Videos Come From
 
-The app looks for videos in these locations (in order):
+The app scans **your entire device gallery** using Android MediaStore:
+- ✅ Camera recordings
+- ✅ Downloads folder
+- ✅ WhatsApp/Telegram videos
+- ✅ Any video accessible in Gallery app
+- ✅ All folders with videos
 
-1. **Primary**: `/Internal Storage/Movies/KidsVideos/`
-2. **Alternative**: `/Internal Storage/DCIM/KidsVideos/`
-3. **Fallback**: App will scan all device videos with "rhyme", "song", or "[Short]" in filename
+**No specific folder required!**
 
 ### 🎬 Supported Video Formats
 
@@ -65,16 +85,18 @@ The app looks for videos in these locations (in order):
 - ✅ `.3gp`
 - ✅ `.webm`
 
-### 📊 How File Names Become Metadata
+### 📊 How Videos Are Categorized
 
-The app parses your filename and video properties to extract information:
+The app automatically reads video properties:
 
-| Filename | Resolution | Title | Channel | Goes To |
-|----------|-----------|-------|---------|---------|
+| Video File | Resolution | Title | Channel | Goes To |
+|------------|-----------|-------|---------|---------|
 | `Happy Birthday - Kids.mp4` | 1920x1080 | Happy Birthday | Kids | Home (landscape) |
 | `Dance Time - Fun.mp4` | 1080x1920 | Dance Time | Fun | Shorts (portrait) |
-| `[Short] ABC - Learning.mp4` | 1920x1080 | ABC | Learning | Shorts (forced) |
-| `MyVideo.mp4` | 1280x720 | MyVideo | Local Videos | Home (landscape) |
+| `VID_20231015.mp4` | 1280x720 | VID_20231015 | Gallery | Home (landscape) |
+| `MyVideo.mp4` | 1080x1920 | MyVideo | Gallery | Shorts (portrait) |
+
+**It's all automatic - no manual work needed!**
 
 ### 🔄 Refreshing Video List
 
@@ -85,89 +107,70 @@ The app automatically scans for videos every 5 minutes. To force a refresh:
 ### ⚠️ Troubleshooting
 
 **Videos not showing up?**
-1. Check folder name is exactly `KidsVideos` (case-sensitive)
-2. Verify files are `.mp4` format
-3. Make sure storage permission is granted
-4. Try renaming with the format: `Title - Channel.mp4`
+1. Make sure storage permission is granted
+2. Check that videos play in your Gallery app first
+3. Try restarting the app
+4. Wait 5 minutes (cache refresh)
 
 **Permission Denied?**
-- When you first open the app, grant "Files and Media" permission
-- On Android 13+, you'll be asked to allow "Videos" access
+- When you first open the app, grant "Videos" or "Files and Media" permission
+- On Android 13+: Settings > Apps > Kids Curated Player > Permissions > Videos → Allow
 
 **Videos showing but won't play?**
 - Make sure video codec is H.264 (most compatible)
 - Try converting video to MP4 format
-- Check file isn't corrupted (try playing on computer first)
+- Check file isn't corrupted
 
 ### 🎨 Tips for Best Experience
 
 1. **Video Quality**:
    - 720p is good balance of quality and file size
    - 480p works fine for kids content
-   - Avoid 4K (takes too much storage)
+   - Phone camera videos work perfectly
 
 2. **File Size**:
-   - Keep videos under 100MB each
-   - Shorter videos (2-5 min) work best
+   - Keep videos under 100MB each for smooth playback
+   - Shorter videos (2-5 min) work best for kids
 
-3. **Thumbnails**:
-   - App uses first frame of video as thumbnail
-   - Make sure first frame looks good!
+3. **Organization** (optional):
+   - Use `Title - Channel.mp4` naming for better organization
+   - Group similar content with same channel name
+   - Simple names like `birthday.mp4` work fine too
 
-4. **Organization**:
-   - Use consistent naming for easier management
-   - Group similar videos with same channel name
+4. **Automatic Categorization**:
+   - Portrait videos (selfie-style) → Shorts
+   - Landscape videos (normal) → Home
+   - No manual tagging needed!
 
 ### 📱 Storage Management
 
 **Check Available Space:**
 - Go to Settings > Storage
-- Make sure you have at least 1GB free
+- The app shows ALL videos already in your gallery
+- No extra storage needed!
 
-**Example Storage Usage:**
-- 10 videos (50MB each) = 500MB
-- 50 videos (30MB each) = 1.5GB
-- 100 videos (20MB each) = 2GB
+**Example:**
+- 10 videos already on phone = 0 MB extra
+- Just install the app and it works with existing videos
 
-### 🚀 Advanced: Using ADB (Wireless Transfer)
-
-If you don't have a USB cable:
-
-```bash
-# Enable wireless debugging in Developer Options
-# Get your phone's IP address from Settings > About Phone > Status
-
-# Connect via ADB
-adb connect <phone-ip>:5555
-
-# Push videos to phone
-adb push "Happy Birthday - Kids.mp4" /sdcard/Movies/KidsVideos/
-```
-
-### 🔒 Privacy & Security
+###  Privacy & Security
 
 ✅ **All videos stay on your device** - nothing is uploaded
-✅ **No internet required** after initial setup
+✅ **No internet required** - works 100% offline
 ✅ **No tracking** of what your child watches
-✅ **Complete control** over content
-
-### 🎯 Mixed Content (YouTube + Local)
-
-Currently, the app is configured for **local videos only**. To add YouTube videos back:
-1. Set up Supabase database (see SUPABASE_SETUP.md)
-2. The app will show both local and YouTube videos together
+✅ **Complete control** - only shows videos you already have
+✅ **No cloud sync** - everything is local
 
 ---
 
 ## 📋 Quick Checklist
 
-- [ ] Created `/Movies/KidsVideos/` folder on phone
-- [ ] Copied video files to folder
-- [ ] Named files with format: `Title - Channel.mp4`
-- [ ] Granted storage permission to app
+- [ ] Have some videos on your phone (camera, downloads, etc.)
+- [ ] Installed the app
+- [ ] Granted "Videos" permission
 - [ ] Opened app and verified videos appear
 - [ ] Tested video playback
 
 ## 🎉 You're All Set!
 
-Your kids can now watch curated videos completely offline with zero YouTube tracking!
+Your kids can now watch ALL your device videos in a clean, ad-free interface with automatic shorts/regular categorization!

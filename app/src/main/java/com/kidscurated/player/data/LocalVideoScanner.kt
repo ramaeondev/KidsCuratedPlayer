@@ -30,29 +30,17 @@ object LocalVideoScanner {
     private const val KIDS_VIDEOS_FOLDER = "KidsVideos"
     
     /**
-     * Scans the device for videos in specific folders
+     * Scans the device for ALL videos in gallery
      */
     suspend fun scanLocalVideos(context: Context): List<Video> {
         return withContext(Dispatchers.IO) {
             try {
-                println("📁 Scanning local storage for videos...")
-                val videos = mutableListOf<Video>()
-                
-                // Method 1: Scan specific folder if exists
-                val folderVideos = scanKidsVideosFolder(context)
-                videos.addAll(folderVideos)
-                
-                // Method 2: Query MediaStore for all videos (fallback)
-                if (videos.isEmpty()) {
-                    println("📁 No videos in KidsVideos folder, scanning all device videos...")
-                    val allVideos = scanAllDeviceVideos(context)
-                    videos.addAll(allVideos)
-                }
-                
-                println("✅ Found ${videos.size} local videos")
+                println("📁 Scanning device gallery for all videos...")
+                val videos = scanAllDeviceVideos(context)
+                println("✅ Found ${videos.size} videos in gallery")
                 videos
             } catch (e: Exception) {
-                println("❌ Error scanning local videos: ${e.message}")
+                println("❌ Error scanning gallery videos: ${e.message}")
                 e.printStackTrace()
                 emptyList()
             }
@@ -133,20 +121,16 @@ object LocalVideoScanner {
                 val duration = cursor.getLong(durationColumn)
                 val path = cursor.getString(pathColumn)
                 
-                // Only include videos in KidsVideos folder or with specific naming
-                if (path.contains(KIDS_VIDEOS_FOLDER, ignoreCase = true) || 
-                    name.matches(Regex(".*\\[Short\\].*|.*\\d+.*rhyme.*|.*song.*", RegexOption.IGNORE_CASE))) {
-                    
-                    val contentUri = Uri.withAppendedPath(
-                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                        id.toString()
-                    )
-                    
-                    val video = parseVideoFromMediaStore(contentUri, name, duration)
-                    if (video != null) {
-                        videos.add(video)
-                        println("  ✓ Added from MediaStore: ${video.title}")
-                    }
+                // Include ALL videos from device gallery
+                val contentUri = Uri.withAppendedPath(
+                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                    id.toString()
+                )
+                
+                val video = parseVideoFromMediaStore(contentUri, name, duration, path)
+                if (video != null) {
+                    videos.add(video)
+                    println("  ✓ Added: ${video.title} (${if (video.isShort) "Short" else "Regular"})")
                 }
             }
         }
@@ -199,7 +183,7 @@ object LocalVideoScanner {
      * Parse video from MediaStore query result
      * Auto-detects if it's a short based on aspect ratio
      */
-    private fun parseVideoFromMediaStore(uri: Uri, displayName: String, durationMs: Long): Video? {
+    private fun parseVideoFromMediaStore(uri: Uri, displayName: String, durationMs: Long, path: String): Video? {
         val fileName = displayName.substringBeforeLast('.')
         
         // Check if explicitly marked as short in filename
@@ -212,11 +196,11 @@ object LocalVideoScanner {
         }
         
         val parts = cleanName.split(" - ")
-        val title = parts.getOrNull(0)?.trim() ?: displayName
-        val channelName = parts.getOrNull(1)?.trim() ?: "Local Videos"
+        val title = parts.getOrNull(0)?.trim() ?: displayName.substringBeforeLast('.')
+        val channelName = parts.getOrNull(1)?.trim() ?: "Gallery"
         
-        // Detect if video is short based on resolution
-        val isShort = explicitlyMarkedShort || isPortraitVideo(uri.toString())
+        // Detect if video is short based on resolution (use file path for better compatibility)
+        val isShort = explicitlyMarkedShort || isPortraitVideo(path)
         
         return Video(
             id = "local_${uri.hashCode()}",

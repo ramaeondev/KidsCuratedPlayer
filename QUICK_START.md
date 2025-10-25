@@ -1,86 +1,71 @@
 # 🎬 Kids Curated Player - Quick Start
 
-## ✅ What Changed
+## ✅ What This App Does
 
-**Your app now works 100% offline with local videos from your device!**
+**Shows ALL your device videos in a clean, YouTube-like interface!**
 
-- ❌ No more YouTube dependency
-- ❌ No more Supabase database
-- ❌ No more internet required
-- ✅ Videos stored on your phone
-- ✅ Complete privacy and control
-- ✅ Works offline forever
+- ✅ Automatically finds ALL videos on your phone
+- ✅ Portrait videos → Shorts tab (like TikTok)
+- ✅ Landscape videos → Home tab (like YouTube)
+- ✅ Works 100% offline
+- ✅ No ads, no tracking, no YouTube algorithm
 
 ---
 
-## 📱 Setup in 3 Steps
+## 📱 Setup in 2 Steps
 
-### Step 1: Create Folder
-On your phone, create:
-```
-/Internal Storage/Movies/KidsVideos/
-```
-
-### Step 2: Add Videos
-Copy MP4 videos to that folder with this naming:
-```
-Happy Birthday Song - Kids Channel.mp4
-[Short] Dance Time - Fun Videos.mp4
-```
-
-### Step 3: Install App
+### Step 1: Install App
 Download the latest APK from GitHub releases and install.
+
+### Step 2: Grant Permission
+When you first open the app, tap **Allow** for "Videos" access.
 
 **That's it!** 🎉
 
+All your existing videos will automatically appear in the app, categorized by their aspect ratio.
+
 ---
 
-## 📝 File Naming Rules
+## 📝 How Videos Are Organized
 
-| Format | Example | Resolution | Result |
-|--------|---------|------------|--------|
-| `Title - Channel.mp4` | `ABC Song - Learning.mp4` | 1920x1080 (landscape) | Home tab |
-| `Title - Channel.mp4` | `Dance Time - Kids.mp4` | 1080x1920 (portrait) | Shorts tab |
-| `[Short] Title - Channel.mp4` | `[Short] ABC - Kids.mp4` | Any resolution | Forces Shorts tab |
-| `Just Title.mp4` | `MyVideo.mp4` | Any | Auto-detected by resolution |
+The app **automatically scans your entire gallery** and categorizes by resolution:
 
-### 🎯 **Smart Detection**
+| Your Video | Resolution | Where It Shows |
+|-----------|------------|----------------|
+| Family vacation.mp4 | 1920x1080 (landscape) | Home tab |
+| Kid dancing.mp4 | 1080x1920 (portrait) | Shorts tab |
+| Birthday party.mp4 | 1280x720 (landscape) | Home tab |
+| Funny moment.mp4 | 1080x1920 (portrait) | Shorts tab |
 
-The app **automatically detects shorts** based on video resolution:
-- **Portrait/Vertical** (9:16, 9:18, etc.) → Shorts tab
-- **Landscape/Horizontal** (16:9, 4:3, etc.) → Home tab
+### 🎯 **100% Automatic**
 
-You don't need to manually mark videos as shorts - just name them normally!
+- **Portrait/Vertical** (phone held upright) → Shorts tab
+- **Landscape/Horizontal** (phone held sideways) → Home tab
+
+No folders. No renaming. Just works!
 
 ---
 
 ## 🔑 First Launch
 
-When you first open the app:
-1. You'll see permission request for "Videos"
-2. Tap **Allow** 
-3. App scans your KidsVideos folder
-4. Videos appear in Home and Shorts tabs
+1. Open the app
+2. Permission popup appears: "Allow Kids Curated Player to access videos?"
+3. Tap **Allow**
+4. App scans your gallery (takes a few seconds)
+5. All your videos appear, auto-categorized!
 
 ---
 
-## 📂 Where to Put Videos
+## 📂 What Videos Are Included
 
-**Best location:**
-```
-/Internal Storage/Movies/KidsVideos/
-```
+The app shows **ALL videos from your device:**
+- ✅ Camera recordings
+- ✅ Downloaded videos
+- ✅ WhatsApp/Telegram videos
+- ✅ Screen recordings
+- ✅ Any video in your Gallery app
 
-**Alternative locations** (app checks these too):
-```
-/Internal Storage/DCIM/KidsVideos/
-/Android/data/com.kidscurated.player/files/Movies/KidsVideos/
-```
-
-**Or anywhere** with these in filename:
-- "rhyme"
-- "song"
-- "[Short]"
+**Sources don't matter - if it's in your gallery, it's in the app!**
 
 ---
 
@@ -104,63 +89,71 @@ When you first open the app:
 ## 🔧 Troubleshooting
 
 ### "No videos found"
-- Check folder is named exactly: `KidsVideos`
-- Make sure files are `.mp4` format
-- Grant storage permission in Settings > Apps > Kids Curated Player > Permissions
-- Try restarting the app
+- Grant storage permission: Settings > Apps > Kids Curated Player > Permissions > Videos → Allow
+- Make sure you have videos in your Gallery app
+- Restart the app
 
 ### Videos won't play
-- Convert to MP4 format (use VLC or Handbrake)
-- Make sure codec is H.264
-- Test file plays on computer first
+- Check video plays in default Gallery app first
+- Try converting to MP4 format (H.264 codec)
 
 ### Permission denied
 - Go to Settings > Apps > Kids Curated Player
 - Tap Permissions
-- Enable "Files and Media" or "Videos"
+- Enable "Videos" or "Files and Media"
 
 ---
 
-## 💡 Pro Tips
+## 💡 Optional: Better Organization
 
-1. **Organize by channel name** - Use consistent channel names for easier browsing
-2. **Keep videos short** - 2-5 minutes works best for kids
-3. **Use 720p quality** - Good balance of quality and file size
-4. **Test on computer first** - Make sure video plays before copying
-5. **Batch convert** - Use Handbrake to convert many videos at once
+Want custom titles and channel names? Rename your videos like this:
 
----
+**Format:** `Title - Channel Name.mp4`
 
-## 📊 Example Setup
-
+**Examples:**
 ```
-/Internal Storage/Movies/KidsVideos/
-├── ABC Song - Learning Time.mp4 (1920x1080, 45MB, 3:20) → Home
-├── Happy Birthday - Rhymes.mp4 (1280x720, 38MB, 2:45) → Home
-├── Dance Moves - Kids Fun.mp4 (1080x1920, 12MB, 0:45) → Shorts (portrait)
-├── Color Song - Toddlers.mp4 (1080x1920, 15MB, 1:00) → Shorts (portrait)
-├── Nursery Rhymes Collection - Baby Songs.mp4 (1920x1080, 82MB, 8:15) → Home
-└── Animal Sounds - Educational.mp4 (1280x720, 55MB, 4:30) → Home
+Birthday Party - Family Videos.mp4
+Dance Performance - Kids Channel.mp4
+Funny Moment - Home Videos.mp4
 ```
 
-App will show:
-- **Home tab**: 4 regular videos (all landscape)
-- **Shorts tab**: 2 short videos (all portrait)
+But it's **totally optional** - simple names work great too!
 
-**Auto-detection based on aspect ratio!**
+## 📊 Example: What You'll See
+
+If your gallery has these videos:
+```
+Camera/
+├── VID_20231015.mp4 (1920x1080) → Home tab
+├── VID_20231016.mp4 (1080x1920) → Shorts tab
+
+Downloads/
+├── FunnyVideo.mp4 (1280x720) → Home tab
+├── TikTokVideo.mp4 (1080x1920) → Shorts tab
+
+WhatsApp/
+├── Birthday.mp4 (1920x1080) → Home tab
+└── Dance.mp4 (1080x1920) → Shorts tab
+```
+
+The app shows:
+- **Home tab**: 3 landscape videos
+- **Shorts tab**: 3 portrait videos
+
+**All automatic - no manual setup!**
 
 ---
 
 ## 🎯 Why This is Better
 
-| Old Way (YouTube/DB) | New Way (Local Files) |
-|---------------------|----------------------|
+| Traditional Kids Apps | This App |
+|----------------------|----------|
+| Requires content upload | Uses existing videos |
+| Need specific folder structure | Scans entire gallery |
+| Manual categorization | Auto-detects orientation |
+| Limited to their content | Shows YOUR videos |
 | Internet required | Works offline |
-| YouTube tracking | Zero tracking |
-| Hosting costs | Free forever |
-| Limited control | Complete control |
-| Can break anytime | Always works |
-| Complex setup | Simple file copy |
+| Ads and tracking | Zero tracking |
 
 ---
 
