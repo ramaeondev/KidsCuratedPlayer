@@ -159,7 +159,7 @@ The app shows:
 
 ## 📦 Download APK
 
-Latest version: https://github.com/ramaeondev/KidsCuratedPlayer/releases/download/latest/app-debug-latest.apk
+Latest version: https://github.com/ramaeondev/KidsCuratedPlayer/releases/download/latest/KidsCuratedPlayer-latest.apk
 
 GitHub repo: https://github.com/ramaeondev/KidsCuratedPlayer
 

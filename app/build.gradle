@@ -25,7 +25,25 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        debug {
+            // Custom APK name for debug builds
+            applicationIdSuffix ".debug"
+        }
     }
+    
+    // Rename APK files after build
+    android.applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def appName = "KidsCuratedPlayer"
+            def versionName = variant.versionName
+            def versionCode = variant.versionCode
+            def buildType = variant.buildType.name
+            
+            // Format: KidsCuratedPlayer-v10.0-debug.apk
+            outputFileName = "${appName}-v${versionName}-${buildType}.apk"
+        }
+    }
+    
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
