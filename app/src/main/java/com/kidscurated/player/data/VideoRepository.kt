@@ -1,5 +1,6 @@
 package com.kidscurated.player.data
 
+import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -11,70 +12,35 @@ data class Video(
     val views: String,
     val uploadTime: String,
     val duration: String,
-    val youtubeUrl: String,
+    val youtubeUrl: String, // For local videos, this will be the file URI
     val isShort: Boolean = false
 )
 
 object VideoRepository {
-    // Cache for fetched videos
+    // Cache for scanned videos
     private var cachedVideos: List<Video>? = null
     private var cachedShorts: List<Video>? = null
-    private var lastFetchTime: Long = 0
+    private var lastScanTime: Long = 0
     private const val CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
     
-    // Fetch videos from Supabase
-    suspend fun fetchVideosFromSupabase(): List<Video> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val supabaseVideos = RetrofitClient.supabaseService.getVideos()
-                supabaseVideos.map { it.toVideo() }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                // Return empty list if API fails
-                emptyList()
-            }
-        }
+    // Application context (set from Application class)
+    private var appContext: Context? = null
+    
+    fun init(context: Context) {
+        appContext = context.applicationContext
     }
     
-    // Fetch only regular videos
-    suspend fun fetchRegularVideosFromSupabase(): List<Video> {
+    // Scan local storage for videos
+    suspend fun scanLocalVideos(): List<Video> {
+        val context = appContext ?: throw IllegalStateException("VideoRepository not initialized")
         return withContext(Dispatchers.IO) {
             try {
-                println("📡 Fetching regular videos from Supabase...")
-                println("🔗 API URL: ${RetrofitClient.supabaseService::class.java}")
-                val supabaseVideos = RetrofitClient.supabaseService.getRegularVideos()
-                println("✅ Received ${supabaseVideos.size} videos from Supabase")
-                if (supabaseVideos.isNotEmpty()) {
-                    println("📦 First video sample: ${supabaseVideos[0]}")
-                }
-                val converted = supabaseVideos.map { it.toVideo() }
-                println("🔄 Converted ${converted.size} videos")
-                converted
+                println("� Scanning local videos...")
+                val videos = LocalVideoScanner.scanLocalVideos(context)
+                println("✅ Found ${videos.size} local videos")
+                videos
             } catch (e: Exception) {
-                println("❌ Error fetching videos: ${e.javaClass.simpleName}: ${e.message}")
-                println("❌ Stack trace:")
-                e.printStackTrace()
-                emptyList()
-            }
-        }
-    }
-    
-    // Fetch only shorts
-    suspend fun fetchShortsFromSupabase(): List<Video> {
-        return withContext(Dispatchers.IO) {
-            try {
-                println("📡 Fetching shorts from Supabase...")
-                val supabaseVideos = RetrofitClient.supabaseService.getShorts()
-                println("✅ Received ${supabaseVideos.size} shorts from Supabase")
-                if (supabaseVideos.isNotEmpty()) {
-                    println("📦 First short sample: ${supabaseVideos[0]}")
-                }
-                val converted = supabaseVideos.map { it.toVideo() }
-                println("🔄 Converted ${converted.size} shorts")
-                converted
-            } catch (e: Exception) {
-                println("❌ Error fetching shorts: ${e.javaClass.simpleName}: ${e.message}")
-                println("❌ Stack trace:")
+                println("❌ Error scanning local videos: ${e.message}")
                 e.printStackTrace()
                 emptyList()
             }
@@ -84,9 +50,11 @@ object VideoRepository {
     // Get all videos with caching
     suspend fun getAllVideos(): List<Video> {
         val currentTime = System.currentTimeMillis()
-        if (cachedVideos == null || currentTime - lastFetchTime > CACHE_DURATION) {
-            cachedVideos = fetchRegularVideosFromSupabase()
-            lastFetchTime = currentTime
+        if (cachedVideos == null || currentTime - lastScanTime > CACHE_DURATION) {
+            val allVideos = scanLocalVideos()
+            cachedVideos = allVideos.filter { !it.isShort }
+            cachedShorts = allVideos.filter { it.isShort }
+            lastScanTime = currentTime
         }
         return cachedVideos ?: emptyList()
     }
@@ -94,38 +62,25 @@ object VideoRepository {
     // Get all shorts with caching
     suspend fun getAllShorts(): List<Video> {
         val currentTime = System.currentTimeMillis()
-        if (cachedShorts == null || currentTime - lastFetchTime > CACHE_DURATION) {
-            cachedShorts = fetchShortsFromSupabase()
-            lastFetchTime = currentTime
+        if (cachedShorts == null || currentTime - lastScanTime > CACHE_DURATION) {
+            val allVideos = scanLocalVideos()
+            cachedVideos = allVideos.filter { !it.isShort }
+            cachedShorts = allVideos.filter { it.isShort }
+            lastScanTime = currentTime
         }
         return cachedShorts ?: emptyList()
     }
     
     // Get video by ID
-    fun getVideoById(id: String): Video? {
-        return cachedVideos?.find { it.id == id }
-            ?: cachedShorts?.find { it.id == id }
+    fun getVideoById(videoId: String): Video? {
+        val allVideos = (cachedVideos ?: emptyList()) + (cachedShorts ?: emptyList())
+        return allVideos.find { it.id == videoId }
     }
     
-    // Clear cache (useful for refresh)
+    // Clear cache to force rescan
     fun clearCache() {
         cachedVideos = null
         cachedShorts = null
-        lastFetchTime = 0
+        lastScanTime = 0
     }
-}
-
-// Extension function to convert Supabase model to app model
-fun SupabaseVideo.toVideo(): Video {
-    return Video(
-        id = this.id,
-        title = this.title,
-        channelName = this.channelname,  // Map lowercase to camelCase
-        thumbnailUrl = this.thumbnailurl,  // Map lowercase to camelCase
-        views = this.views,
-        uploadTime = this.uploadtime,  // Map lowercase to camelCase
-        duration = this.duration,
-        youtubeUrl = this.youtubeurl,  // Map lowercase to camelCase
-        isShort = this.isshort  // Map lowercase to camelCase
-    )
 }

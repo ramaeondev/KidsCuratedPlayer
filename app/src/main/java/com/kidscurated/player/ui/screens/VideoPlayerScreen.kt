@@ -26,6 +26,10 @@ fun VideoPlayerScreen(videoId: String, navController: NavController) {
     val video = VideoRepository.getVideoById(videoId)
     val context = LocalContext.current
     val isShort = video?.isShort == true
+    val videoUrl = video?.youtubeUrl ?: ""
+    
+    // Detect if it's a local file URI
+    val isLocalVideo = videoUrl.startsWith("file://") || videoUrl.startsWith("content://")
     
     Column(
         modifier = Modifier
@@ -84,7 +88,12 @@ fun VideoPlayerScreen(videoId: String, navController: NavController) {
                             ): Boolean {
                                 val url = request?.url?.toString() ?: return false
                                 
-                                // Allow loading our specific video URLs
+                                // For local videos, don't block anything
+                                if (url.startsWith("file://") || url.startsWith("content://")) {
+                                    return false
+                                }
+                                
+                                // Allow loading our specific video URLs for YouTube
                                 if (url.contains("youtube.com/shorts/$videoId") ||
                                     url.contains("youtube.com/embed/$videoId") ||
                                     url.contains("youtube.com/watch?v=$videoId")) {
@@ -96,12 +105,46 @@ fun VideoPlayerScreen(videoId: String, navController: NavController) {
                             }
                         }
                         
-                        // For shorts, use the mobile YouTube URL; for videos, try mobile watch URL
-                        if (isShort) {
-                            loadUrl("https://m.youtube.com/shorts/$videoId")
+                        // Load video based on source type
+                        if (isLocalVideo) {
+                            // Load local video using HTML5 video player
+                            val html = """
+                                <!DOCTYPE html>
+                                <html>
+                                <head>
+                                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                    <style>
+                                        * { margin: 0; padding: 0; }
+                                        body { 
+                                            background: black; 
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            height: 100vh;
+                                        }
+                                        video { 
+                                            width: 100%; 
+                                            height: 100%; 
+                                            object-fit: contain;
+                                        }
+                                    </style>
+                                </head>
+                                <body>
+                                    <video controls autoplay playsinline controlsList="nodownload">
+                                        <source src="$videoUrl" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </body>
+                                </html>
+                            """.trimIndent()
+                            loadDataWithBaseURL(null, html, "text/html", "utf-8", null)
                         } else {
-                            // Use mobile watch URL instead of embed to fix Error Code 15
-                            loadUrl("https://m.youtube.com/watch?v=$videoId")
+                            // Load YouTube video
+                            if (isShort) {
+                                loadUrl("https://m.youtube.com/shorts/$videoId")
+                            } else {
+                                loadUrl("https://m.youtube.com/watch?v=$videoId")
+                            }
                         }
                     }
                 },
