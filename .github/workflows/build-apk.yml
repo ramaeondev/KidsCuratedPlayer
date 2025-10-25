@@ -11,6 +11,8 @@ jobs:
   build:
     name: Build APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to create/update releases
     
     steps:
       - name: Checkout code
@@ -32,6 +34,12 @@ jobs:
       
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
+      
+      - name: Get commit info
+        id: commit
+        run: |
+          echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "DATE=$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
       
       - name: Build Release APK (unsigned)
         run: ./gradlew assembleRelease --stacktrace
@@ -62,3 +70,91 @@ jobs:
           echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ APK is ready for download in the Artifacts section above!" >> $GITHUB_STEP_SUMMARY
+      
+      # PUBLIC DOWNLOAD - Create/Update "latest" release (NO LOGIN REQUIRED)
+      - name: Create APK with stable name for public download
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk app-debug-latest.apk
+          cp app/build/outputs/apk/debug/app-debug.apk app-debug-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}.apk
+      
+      - name: Update Latest Release with APK (Public Download)
+        uses: softprops/action-gh-release@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          tag_name: latest
+          name: "📱 Latest Build (Auto-updated)"
+          body: |
+            ## 🚀 Latest Development Build
+            
+            **📥 PUBLIC DOWNLOAD - No GitHub Login Required!**
+            
+            This APK is automatically built from the latest `main` branch code.
+            Anyone can download and install this APK directly.
+            
+            ### 📲 Quick Download:
+            Click the **app-debug-latest.apk** file below to download.
+            
+            ### Installation Instructions:
+            1. Download the APK file
+            2. Transfer to your Android device
+            3. Settings → Security → Enable "Install from Unknown Sources"
+            4. Tap the APK file to install
+            5. Launch "KidsCuratedPlayer"
+            
+            ---
+            
+            ### 📊 Build Information:
+            - **Commit:** ${{ github.sha }}
+            - **Short SHA:** ${{ steps.commit.outputs.SHORT_SHA }}
+            - **Build Date:** ${{ steps.commit.outputs.DATE }}
+            - **Branch:** ${{ github.ref_name }}
+            
+            ### 🔗 Direct Download Links:
+            **Stable URL (always latest):**
+            ```
+            https://github.com/${{ github.repository }}/releases/download/latest/app-debug-latest.apk
+            ```
+            
+            **Timestamped build:**
+            ```
+            https://github.com/${{ github.repository }}/releases/download/latest/app-debug-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}.apk
+            ```
+            
+            ### 📚 Documentation:
+            - [Quick Start Guide](https://github.com/${{ github.repository }}/blob/main/QUICK_START.md)
+            - [Video Configuration](https://github.com/${{ github.repository }}/blob/main/VIDEO_CONFIGURATION_GUIDE.md)
+            - [Parent Safety Guide](https://github.com/${{ github.repository }}/blob/main/PARENT_SAFETY_GUIDE.md)
+            
+            ---
+            
+            ⚠️ **Note:** This is a development build updated automatically with each push.
+            For stable releases, check the [Releases page](https://github.com/${{ github.repository }}/releases).
+          files: |
+            app-debug-latest.apk
+            app-debug-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}.apk
+          draft: false
+          prerelease: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Display Public Download Links
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo "### 🌍 PUBLIC APK DOWNLOAD (No Login Required)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Anyone can download these APKs without logging in to GitHub!**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**📥 Direct Download Link (Always Latest):**" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "https://github.com/${{ github.repository }}/releases/download/latest/app-debug-latest.apk" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**📦 Timestamped Build:**" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "https://github.com/${{ github.repository }}/releases/download/latest/app-debug-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}.apk" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🌐 Release Page:**" >> $GITHUB_STEP_SUMMARY
+          echo "https://github.com/${{ github.repository }}/releases/tag/latest" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Share this link with anyone - no GitHub account needed!**" >> $GITHUB_STEP_SUMMARY
