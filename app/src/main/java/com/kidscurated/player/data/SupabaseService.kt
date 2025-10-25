@@ -7,10 +7,10 @@ interface SupabaseService {
     @GET("videos?select=*")
     suspend fun getVideos(): List<SupabaseVideo>
     
-    @GET("videos?select=*&isShort=eq.false")
+    @GET("videos?select=*&isshort=eq.false")  // Changed from isShort to isshort
     suspend fun getRegularVideos(): List<SupabaseVideo>
     
-    @GET("videos?select=*&isShort=eq.true")
+    @GET("videos?select=*&isshort=eq.true")  // Changed from isShort to isshort
     suspend fun getShorts(): List<SupabaseVideo>
 }
 
