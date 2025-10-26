@@ -32,15 +32,22 @@ A YouTube-like Android app designed for children with **local video playback** f
 
 ## 📥 Download & Install
 
-### Latest Release (v11.0)
-**Download APK**: [KidsCuratedPlayer-v11.0-debug.apk](https://github.com/ramaeondev/KidsCuratedPlayer/releases/download/latest/KidsCuratedPlayer-latest.apk)
+### Latest Release (v1.0.0 Beta)
+**Download APK**: 
+- **Release** (Recommended): [KidsCuratedPlayer-v1.0.0-release.apk](KidsCuratedPlayer-v1.0.0-release.apk) (12MB)
+- **Debug**: [KidsCuratedPlayer-v1.0.0-debug.apk](KidsCuratedPlayer-v1.0.0-debug.apk) (18MB)
+- **Auto-Update**: [KidsCuratedPlayer-latest.apk](https://github.com/ramaeondev/KidsCuratedPlayer/releases/download/latest/KidsCuratedPlayer-latest.apk)
 
-**What's New in v11.0**:
+**What's New in v1.0.0**:
+- ✅ First official beta release
+- ✅ Professional launcher icon (red play button + gold star)
 - ✅ Automatic thumbnail generation from video frames
 - ✅ Vertical shorts scrolling (swipe up/down like TikTok)
 - ✅ Thumbnail caching for instant loading
 - ✅ Smart content:// URI handling for gallery videos
 - ✅ Improved error handling and logging
+
+**See**: [INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md) for detailed setup instructions
 
 ### Installation Steps:
 1. Download the APK from the link above
@@ -216,7 +223,8 @@ For better organization, name your video files:
 
 ## 📝 Version History
 
-- **v11.0** (Current): Thumbnail generation + vertical shorts scrolling
+- **v1.0.0** (Current - Beta): First official beta release with all core features
+- **v11.0** (Previous): Thumbnail generation + vertical shorts scrolling
 - **v10.0**: Custom APK naming with app name
 - **v9.0**: Resolution-based auto-detection for shorts
 - **v8.0**: Gallery-wide scanning (removed folder restrictions)
