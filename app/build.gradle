@@ -24,6 +24,8 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Use debug signing for release builds (for testing purposes)
+            signingConfig signingConfigs.debug
         }
         debug {
             // Custom APK name for debug builds

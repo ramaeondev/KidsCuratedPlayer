@@ -77,22 +77,33 @@ object ThumbnailGenerator {
         onProgress: ((Int, Int) -> Unit)? = null
     ) {
         withContext(Dispatchers.IO) {
-            _progress.value = GenerationProgress(total = videos.size)
+            // Initialize progress with total count
+            _progress.value = GenerationProgress(total = videos.size, completed = 0)
             
             videos.forEachIndexed { index, video ->
                 try {
+                    // Update progress before processing
                     _progress.value = _progress.value.copy(
                         completed = index,
-                        currentVideoId = video.id
+                        currentVideoId = video.id,
+                        isComplete = false
                     )
                     onProgress?.invoke(index, videos.size)
                     
-                    getThumbnail(context, video.id, video.youtubeUrl)
+                    // Check if thumbnail already exists
+                    val thumbnailFile = getThumbnailFile(context, video.id)
+                    if (!thumbnailFile.exists()) {
+                        // Only generate if not cached
+                        getThumbnail(context, video.id, video.youtubeUrl)
+                    }
+                    // If cached, just skip (counts as completed)
+                    
                 } catch (e: Exception) {
                     // Continue with next video even if one fails
                 }
             }
             
+            // Mark as complete
             _progress.value = _progress.value.copy(
                 completed = videos.size,
                 isComplete = true
