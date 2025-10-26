@@ -35,15 +35,14 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
       
+      - name: Build Release APK
+        run: ./gradlew assembleRelease --stacktrace
+      
       - name: Get commit info
         id: commit
         run: |
           echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           echo "DATE=$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
-      
-      - name: Build Release APK (unsigned)
-        run: ./gradlew assembleRelease --stacktrace
-        continue-on-error: true  # Continue even if release build fails (needs signing)
       
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
@@ -54,32 +53,44 @@ jobs:
       
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
-        if: success()
         with:
           name: KidsCuratedPlayer-release
           path: app/build/outputs/apk/release/KidsCuratedPlayer-v*.apk
           retention-days: 30
-        continue-on-error: true
       
       - name: Get APK Info
         run: |
-          APK_FILE=$(ls app/build/outputs/apk/debug/KidsCuratedPlayer-*.apk | head -1)
+          DEBUG_APK=$(ls app/build/outputs/apk/debug/KidsCuratedPlayer-*.apk | head -1)
+          RELEASE_APK=$(ls app/build/outputs/apk/release/KidsCuratedPlayer-*.apk | head -1)
           echo "### 📱 APK Build Information" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**APK Name:** $(basename $APK_FILE)" >> $GITHUB_STEP_SUMMARY
-          echo "**APK Size:** $(ls -lh $APK_FILE | awk '{print $5}')" >> $GITHUB_STEP_SUMMARY
+          echo "#### Debug APK:" >> $GITHUB_STEP_SUMMARY
+          echo "**Name:** $(basename $DEBUG_APK)" >> $GITHUB_STEP_SUMMARY
+          echo "**Size:** $(ls -lh $DEBUG_APK | awk '{print $5}')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### Release APK:" >> $GITHUB_STEP_SUMMARY
+          echo "**Name:** $(basename $RELEASE_APK)" >> $GITHUB_STEP_SUMMARY
+          echo "**Size:** $(ls -lh $RELEASE_APK | awk '{print $5}')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Build Date:** $(date)" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ APK is ready for download in the Artifacts section above!" >> $GITHUB_STEP_SUMMARY
+          echo "✅ APKs are ready for download in the Artifacts section above!" >> $GITHUB_STEP_SUMMARY
       
       # PUBLIC DOWNLOAD - Create/Update "latest" release (NO LOGIN REQUIRED)
-      - name: Create APK with stable name for public download
+      - name: Create APKs with stable names for public download
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          APK_FILE=$(ls app/build/outputs/apk/debug/KidsCuratedPlayer-*.apk | head -1)
-          cp $APK_FILE KidsCuratedPlayer-latest.apk
-          cp $APK_FILE KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}.apk
+          DEBUG_APK=$(ls app/build/outputs/apk/debug/KidsCuratedPlayer-*.apk | head -1)
+          RELEASE_APK=$(ls app/build/outputs/apk/release/KidsCuratedPlayer-*.apk | head -1)
+          
+          # Create stable names for latest builds
+          cp $DEBUG_APK KidsCuratedPlayer-latest-debug.apk
+          cp $RELEASE_APK KidsCuratedPlayer-latest.apk
+          
+          # Create timestamped versions
+          cp $DEBUG_APK KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-debug.apk
+          cp $RELEASE_APK KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-release.apk
       
       - name: Update Latest Release with APK (Public Download)
         uses: softprops/action-gh-release@v1
@@ -93,13 +104,18 @@ jobs:
             **📥 PUBLIC DOWNLOAD - No GitHub Login Required!**
             
             This APK is automatically built from the latest `main` branch code.
-            Anyone can download and install this APK directly.
+            Anyone can download and install these APKs directly.
             
             ### 📲 Quick Download:
-            Click the **KidsCuratedPlayer-latest.apk** file below to download.
+            
+            **🎯 Recommended (Smaller, Faster):**
+            - **[KidsCuratedPlayer-latest.apk](https://github.com/${{ github.repository }}/releases/download/latest/KidsCuratedPlayer-latest.apk)** - Release build
+            
+            **🔧 Debug Version (Larger, More Info):**
+            - **[KidsCuratedPlayer-latest-debug.apk](https://github.com/${{ github.repository }}/releases/download/latest/KidsCuratedPlayer-latest-debug.apk)** - Debug build
             
             ### Installation Instructions:
-            1. Download the APK file
+            1. Download the APK file (release version recommended)
             2. Transfer to your Android device
             3. Settings → Security → Enable "Install from Unknown Sources"
             4. Tap the APK file to install
@@ -114,20 +130,24 @@ jobs:
             - **Branch:** ${{ github.ref_name }}
             
             ### 🔗 Direct Download Links:
-            **Stable URL (always latest):**
+            **Release APK (Stable URL - always latest):**
             ```
             https://github.com/${{ github.repository }}/releases/download/latest/KidsCuratedPlayer-latest.apk
             ```
             
-            **Timestamped build:**
+            **Debug APK (Stable URL - always latest):**
             ```
-            https://github.com/${{ github.repository }}/releases/download/latest/KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}.apk
+            https://github.com/${{ github.repository }}/releases/download/latest/KidsCuratedPlayer-latest-debug.apk
             ```
             
+            **Timestamped builds (this specific commit):**
+            - Release: `KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-release.apk`
+            - Debug: `KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-debug.apk`
+            
             ### 📚 Documentation:
+            - [Installation Guide](https://github.com/${{ github.repository }}/blob/main/INSTALLATION_GUIDE.md)
+            - [Release Notes v1.0.0](https://github.com/${{ github.repository }}/blob/main/RELEASE_NOTES_v1.0.0.md)
             - [Quick Start Guide](https://github.com/${{ github.repository }}/blob/main/QUICK_START.md)
-            - [Video Configuration](https://github.com/${{ github.repository }}/blob/main/VIDEO_CONFIGURATION_GUIDE.md)
-            - [Parent Safety Guide](https://github.com/${{ github.repository }}/blob/main/PARENT_SAFETY_GUIDE.md)
             
             ---
             
@@ -135,7 +155,9 @@ jobs:
             For stable releases, check the [Releases page](https://github.com/${{ github.repository }}/releases).
           files: |
             KidsCuratedPlayer-latest.apk
-            KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}.apk
+            KidsCuratedPlayer-latest-debug.apk
+            KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-release.apk
+            KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-debug.apk
           draft: false
           prerelease: true
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -147,17 +169,21 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ **Anyone can download these APKs without logging in to GitHub!**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**📥 Direct Download Link (Always Latest):**" >> $GITHUB_STEP_SUMMARY
+          echo "**📥 Release APK (Recommended - Smaller, Faster):**" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "https://github.com/${{ github.repository }}/releases/download/latest/KidsCuratedPlayer-latest.apk" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**📦 Timestamped Build:**" >> $GITHUB_STEP_SUMMARY
+          echo "**� Debug APK (Larger, More Debug Info):**" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "https://github.com/${{ github.repository }}/releases/download/latest/KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}.apk" >> $GITHUB_STEP_SUMMARY
+          echo "https://github.com/${{ github.repository }}/releases/download/latest/KidsCuratedPlayer-latest-debug.apk" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**📦 Timestamped Builds:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Release: KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-release.apk" >> $GITHUB_STEP_SUMMARY
+          echo "- Debug: KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-debug.apk" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**🌐 Release Page:**" >> $GITHUB_STEP_SUMMARY
           echo "https://github.com/${{ github.repository }}/releases/tag/latest" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Share this link with anyone - no GitHub account needed!**" >> $GITHUB_STEP_SUMMARY
+          echo "**Share these links with anyone - no GitHub account needed!**" >> $GITHUB_STEP_SUMMARY
