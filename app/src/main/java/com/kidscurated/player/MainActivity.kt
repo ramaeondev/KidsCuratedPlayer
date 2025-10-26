@@ -51,17 +51,8 @@ class MainActivity : ComponentActivity() {
             Manifest.permission.READ_EXTERNAL_STORAGE
         }
         
-        when {
-            ContextCompat.checkSelfPermission(
-                this,
-                permission
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                println("✅ Storage permission already granted")
-            }
-            else -> {
-                println("📋 Requesting storage permission...")
-                permissionLauncher.launch(permission)
-            }
+        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            permissionLauncher.launch(permission)
         }
     }
 }

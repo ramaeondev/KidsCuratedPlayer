@@ -5,18 +5,37 @@ import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 
 /**
- * Generates and caches video thumbnails
+ * Generates and caches video thumbnails with progress tracking
  */
 object ThumbnailGenerator {
     
-    private const val THUMBNAIL_WIDTH = 320
-    private const val THUMBNAIL_HEIGHT = 180
-    private const val THUMBNAIL_QUALITY = 80 // JPEG quality 0-100
+    private const val THUMBNAIL_WIDTH = 480 // Increased from 320
+    private const val THUMBNAIL_HEIGHT = 270 // Increased from 180
+    private const val THUMBNAIL_QUALITY = 95 // Increased from 80 for better quality
+    
+    // Progress tracking
+    data class GenerationProgress(
+        val total: Int = 0,
+        val completed: Int = 0,
+        val currentVideoId: String = "",
+        val isComplete: Boolean = false
+    ) {
+        val percentage: Int get() = if (total > 0) (completed * 100 / total) else 0
+    }
+    
+    private val _progress = MutableStateFlow(GenerationProgress())
+    val progress: StateFlow<GenerationProgress> = _progress
+    
+    fun resetProgress() {
+        _progress.value = GenerationProgress()
+    }
     
     /**
      * Get or generate thumbnail for a video
@@ -28,36 +47,62 @@ object ThumbnailGenerator {
                 // Check if thumbnail already exists in cache
                 val thumbnailFile = getThumbnailFile(context, videoId)
                 if (thumbnailFile.exists()) {
-                    println("✅ Thumbnail cache hit: ${thumbnailFile.absolutePath}")
                     return@withContext thumbnailFile.absolutePath
                 }
                 
                 // Generate new thumbnail
-                println("🎬 Generating thumbnail for video: $videoId (URI: $videoUri)")
                 val bitmap = extractThumbnailFromVideo(context, videoUri)
                 
                 if (bitmap != null) {
-                    println("✅ ThumbnailGenerator: Extracted bitmap ${bitmap.width}x${bitmap.height}")
                     // Save to cache
                     saveThumbnail(thumbnailFile, bitmap)
                     bitmap.recycle() // Free memory
-                    println("✅ ThumbnailGenerator: Thumbnail saved: ${thumbnailFile.absolutePath}")
                     return@withContext thumbnailFile.absolutePath
                 } else {
-                    println("❌ ThumbnailGenerator: Failed to extract thumbnail bitmap from video")
                     return@withContext null
                 }
                 
             } catch (e: Exception) {
-                println("❌ ThumbnailGenerator: Error generating thumbnail: ${e.message}")
-                e.printStackTrace()
                 return@withContext null
             }
         }
     }
     
     /**
-     * Extract thumbnail bitmap from video at first frame
+     * Generate thumbnails for multiple videos with progress tracking
+     */
+    suspend fun generateThumbnailsWithProgress(
+        context: Context,
+        videos: List<Video>,
+        onProgress: ((Int, Int) -> Unit)? = null
+    ) {
+        withContext(Dispatchers.IO) {
+            _progress.value = GenerationProgress(total = videos.size)
+            
+            videos.forEachIndexed { index, video ->
+                try {
+                    _progress.value = _progress.value.copy(
+                        completed = index,
+                        currentVideoId = video.id
+                    )
+                    onProgress?.invoke(index, videos.size)
+                    
+                    getThumbnail(context, video.id, video.youtubeUrl)
+                } catch (e: Exception) {
+                    // Continue with next video even if one fails
+                }
+            }
+            
+            _progress.value = _progress.value.copy(
+                completed = videos.size,
+                isComplete = true
+            )
+            onProgress?.invoke(videos.size, videos.size)
+        }
+    }
+    
+    /**
+     * Extract thumbnail bitmap from video at specified time
      */
     private fun extractThumbnailFromVideo(context: Context, videoUri: String): Bitmap? {
         var retriever: MediaMetadataRetriever? = null
@@ -66,35 +111,32 @@ object ThumbnailGenerator {
             
             // Handle both content:// URIs and file:// paths
             if (videoUri.startsWith("content://")) {
-                println("🎬 ThumbnailGenerator: Using content:// URI")
                 retriever.setDataSource(context, Uri.parse(videoUri))
             } else {
-                println("🎬 ThumbnailGenerator: Using file path")
                 retriever.setDataSource(videoUri)
             }
             
-            // Get frame at 1 second (better than first frame which might be black)
-            println("🎬 ThumbnailGenerator: Extracting frame at 1 second...")
-            val bitmap = retriever.getFrameAtTime(
-                1_000_000, // 1 second in microseconds
-                MediaMetadataRetriever.OPTION_CLOSEST_SYNC
-            )
+            // Try multiple time points to get the best frame
+            // 1. Try at 2 seconds (better quality than first second)
+            // 2. Try at 1 second as fallback
+            // 3. Try at beginning as last resort
+            val timePoints = listOf(2_000_000L, 1_000_000L, 0L) // In microseconds
             
-            if (bitmap == null) {
-                println("❌ ThumbnailGenerator: getFrameAtTime returned null, trying at 0...")
-                // Try at beginning if 1 second fails
-                return retriever.getFrameAtTime(
-                    0,
+            for (timePoint in timePoints) {
+                val bitmap = retriever.getFrameAtTime(
+                    timePoint,
                     MediaMetadataRetriever.OPTION_CLOSEST_SYNC
-                )?.let { resizeBitmap(it, THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT) }
+                )
+                
+                if (bitmap != null) {
+                    // Resize to thumbnail dimensions
+                    return resizeBitmap(bitmap, THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT)
+                }
             }
             
-            // Resize to thumbnail dimensions
-            return bitmap?.let { resizeBitmap(it, THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT) }
+            return null
             
         } catch (e: Exception) {
-            println("❌ ThumbnailGenerator: Error extracting frame: ${e.message}")
-            e.printStackTrace()
             return null
         } finally {
             try {
@@ -158,10 +200,9 @@ object ThumbnailGenerator {
                 val cacheDir = File(context.cacheDir, "thumbnails")
                 if (cacheDir.exists()) {
                     cacheDir.listFiles()?.forEach { it.delete() }
-                    println("🗑️ Cleared ${cacheDir.listFiles()?.size ?: 0} thumbnails from cache")
                 }
             } catch (e: Exception) {
-                println("❌ Error clearing thumbnail cache: ${e.message}")
+                // Ignore errors
             }
         }
     }

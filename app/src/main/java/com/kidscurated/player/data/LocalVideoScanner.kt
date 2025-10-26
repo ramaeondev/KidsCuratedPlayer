@@ -35,19 +35,15 @@ object LocalVideoScanner {
     suspend fun scanLocalVideos(context: Context): List<Video> {
         return withContext(Dispatchers.IO) {
             try {
-                println("📁 Scanning device gallery for all videos...")
                 val videos = scanAllDeviceVideos(context)
-                println("✅ Found ${videos.size} videos in gallery")
                 
-                // Generate thumbnails in background for all videos
-                videos.forEach { video ->
-                    ThumbnailGenerator.getThumbnail(context, video.id, video.youtubeUrl)
+                // Generate thumbnails in background with progress tracking
+                if (videos.isNotEmpty()) {
+                    ThumbnailGenerator.generateThumbnailsWithProgress(context, videos)
                 }
                 
                 videos
             } catch (e: Exception) {
-                println("❌ Error scanning gallery videos: ${e.message}")
-                e.printStackTrace()
                 emptyList()
             }
         }
@@ -70,7 +66,6 @@ object LocalVideoScanner {
         
         for (folder in possiblePaths) {
             if (folder.exists() && folder.isDirectory) {
-                println("📂 Found KidsVideos folder at: ${folder.absolutePath}")
                 val files = folder.listFiles { file ->
                     file.isFile && isVideoFile(file.name)
                 }
@@ -79,7 +74,6 @@ object LocalVideoScanner {
                     val video = parseVideoFromFile(file)
                     if (video != null) {
                         videos.add(video)
-                        println("  ✓ Added: ${video.title}")
                     }
                 }
                 
@@ -136,7 +130,6 @@ object LocalVideoScanner {
                 val video = parseVideoFromMediaStore(contentUri, name, duration, path)
                 if (video != null) {
                     videos.add(video)
-                    println("  ✓ Added: ${video.title} (${if (video.isShort) "Short" else "Regular"})")
                 }
             }
         }

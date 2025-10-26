@@ -32,22 +32,22 @@ fun HomeScreen(navController: NavController) {
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     
+    // Track thumbnail generation progress
+    val thumbnailProgress by com.kidscurated.player.data.ThumbnailGenerator.progress.collectAsState()
+    
     // Fetch videos on first composition
     LaunchedEffect(Unit) {
         scope.launch {
             try {
                 isLoading = true
-                println("🏠 HomeScreen: Fetching videos...")
                 videos = VideoRepository.getAllVideos()
-                println("🏠 HomeScreen: Received ${videos.size} videos")
                 if (videos.isEmpty()) {
-                    errorMessage = "No videos found. Please check:\n1. Supabase table created?\n2. RLS policies enabled?\n3. Data inserted?"
+                    errorMessage = "No videos found in your gallery.\n\nPlease add some videos to your device and reopen the app."
                 } else {
                     errorMessage = null
                 }
             } catch (e: Exception) {
-                println("🏠 HomeScreen: Error - ${e.message}")
-                errorMessage = "Error: ${e.message}"
+                errorMessage = "Unable to load videos.\n\nPlease ensure storage permission is granted."
             } finally {
                 isLoading = false
             }
@@ -57,19 +57,78 @@ fun HomeScreen(navController: NavController) {
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         when {
             isLoading -> {
-                CircularProgressIndicator(
+                Column(
                     modifier = Modifier.align(Alignment.Center),
-                    color = Color.Red
-                )
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator(
+                        color = Color.Red
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Loading videos...",
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
             errorMessage != null -> {
-                Text(
-                    text = "Error: $errorMessage",
-                    color = Color.White,
-                    modifier = Modifier.align(Alignment.Center).padding(16.dp)
-                )
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "📱",
+                        style = MaterialTheme.typography.displayLarge
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = errorMessage ?: "",
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
             }
             else -> {
+                Column {
+                    // Show thumbnail generation progress if not complete
+                    if (!thumbnailProgress.isComplete && thumbnailProgress.total > 0) {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = Color.DarkGray
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(12.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        color = Color.Red,
+                                        strokeWidth = 2.dp
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        text = "Generating thumbnails... ${thumbnailProgress.percentage}%",
+                                        color = Color.White,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                LinearProgressIndicator(
+                                    progress = thumbnailProgress.percentage / 100f,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    color = Color.Red,
+                                    trackColor = Color.Gray
+                                )
+                            }
+                        }
+                    }
+                    
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -78,6 +137,7 @@ fun HomeScreen(navController: NavController) {
                             navController.navigate("video_player/${video.id}")
                         })
                     }
+                }
                 }
             }
         }

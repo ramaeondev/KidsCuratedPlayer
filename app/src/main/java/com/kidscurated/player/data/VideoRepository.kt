@@ -35,13 +35,9 @@ object VideoRepository {
         val context = appContext ?: throw IllegalStateException("VideoRepository not initialized")
         return withContext(Dispatchers.IO) {
             try {
-                println("� Scanning local videos...")
                 val videos = LocalVideoScanner.scanLocalVideos(context)
-                println("✅ Found ${videos.size} local videos")
                 videos
             } catch (e: Exception) {
-                println("❌ Error scanning local videos: ${e.message}")
-                e.printStackTrace()
                 emptyList()
             }
         }

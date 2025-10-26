@@ -84,21 +84,80 @@ fun LibraryScreen(navController: NavController? = null) {
 fun VideosLibrary(navController: NavController?) {
     var videos by remember { mutableStateOf<List<Video>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+    
+    // Track thumbnail generation progress
+    val thumbnailProgress by com.kidscurated.player.data.ThumbnailGenerator.progress.collectAsState()
     
     LaunchedEffect(Unit) {
         scope.launch {
-            isLoading = true
-            videos = VideoRepository.getAllVideos()
-            isLoading = false
+            try {
+                isLoading = true
+                videos = VideoRepository.getAllVideos()
+                if (videos.isEmpty()) {
+                    errorMessage = "No videos found in your gallery"
+                }
+            } catch (e: Exception) {
+                errorMessage = "Unable to load videos"
+            } finally {
+                isLoading = false
+            }
         }
     }
     
-    if (isLoading) {
-        Box(modifier = Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = Color.Red)
-        }
-    } else {
+    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+        when {
+            isLoading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = Color.Red
+                )
+            }
+            errorMessage != null -> {
+                Text(
+                    text = errorMessage ?: "",
+                    color = Color.White,
+                    modifier = Modifier.align(Alignment.Center).padding(16.dp)
+                )
+            }
+            else -> {
+                Column {
+                    // Show thumbnail generation progress if not complete
+                    if (!thumbnailProgress.isComplete && thumbnailProgress.total > 0) {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = Color.DarkGray
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(12.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        color = Color.Red,
+                                        strokeWidth = 2.dp
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        text = "Generating thumbnails... ${thumbnailProgress.percentage}%",
+                                        color = Color.White,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                LinearProgressIndicator(
+                                    progress = thumbnailProgress.percentage / 100f,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    color = Color.Red,
+                                    trackColor = Color.Gray
+                                )
+                            }
+                        }
+                    }
+                    
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -203,6 +262,9 @@ fun VideosLibrary(navController: NavController?) {
             }
         }
     }
+                }
+            }
+        }
     }
 }
 
@@ -210,21 +272,80 @@ fun VideosLibrary(navController: NavController?) {
 fun ShortsLibrary(navController: NavController?) {
     var shorts by remember { mutableStateOf<List<Video>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+    
+    // Track thumbnail generation progress
+    val thumbnailProgress by com.kidscurated.player.data.ThumbnailGenerator.progress.collectAsState()
     
     LaunchedEffect(Unit) {
         scope.launch {
-            isLoading = true
-            shorts = VideoRepository.getAllShorts()
-            isLoading = false
+            try {
+                isLoading = true
+                shorts = VideoRepository.getAllShorts()
+                if (shorts.isEmpty()) {
+                    errorMessage = "No shorts found in your gallery"
+                }
+            } catch (e: Exception) {
+                errorMessage = "Unable to load shorts"
+            } finally {
+                isLoading = false
+            }
         }
     }
     
-    if (isLoading) {
-        Box(modifier = Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = Color.Red)
-        }
-    } else {
+    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+        when {
+            isLoading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = Color.Red
+                )
+            }
+            errorMessage != null -> {
+                Text(
+                    text = errorMessage ?: "",
+                    color = Color.White,
+                    modifier = Modifier.align(Alignment.Center).padding(16.dp)
+                )
+            }
+            else -> {
+                Column {
+                    // Show thumbnail generation progress if not complete
+                    if (!thumbnailProgress.isComplete && thumbnailProgress.total > 0) {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = Color.DarkGray
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(12.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        color = Color.Red,
+                                        strokeWidth = 2.dp
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        text = "Generating thumbnails... ${thumbnailProgress.percentage}%",
+                                        color = Color.White,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                LinearProgressIndicator(
+                                    progress = thumbnailProgress.percentage / 100f,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    color = Color.Red,
+                                    trackColor = Color.Gray
+                                )
+                            }
+                        }
+                    }
+                    
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier
@@ -302,5 +423,8 @@ fun ShortsLibrary(navController: NavController?) {
             }
         }
     }
+                }
+            }
+        }
     }
 }

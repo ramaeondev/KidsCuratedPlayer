@@ -18,7 +18,8 @@ import java.io.File
 
 /**
  * Video thumbnail loader that automatically generates and caches thumbnails
- * for local videos using ThumbnailGenerator
+ * for local videos using ThumbnailGenerator.
+ * Shows thumbnails immediately as they're generated.
  */
 @Composable
 fun VideoThumbnail(
@@ -30,32 +31,27 @@ fun VideoThumbnail(
 ) {
     val context = LocalContext.current
     var thumbnailPath by remember { mutableStateOf<String?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
+    var isLoading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     
     // Load or generate thumbnail
     LaunchedEffect(videoId, videoUri) {
         scope.launch {
-            isLoading = true
             try {
-                println("🖼️ VideoThumbnail: Loading thumbnail for $videoId")
+                // Check if thumbnail already exists
                 val path = ThumbnailGenerator.getThumbnail(context, videoId, videoUri)
-                if (path != null) {
-                    println("✅ VideoThumbnail: Got thumbnail path: $path")
-                    val file = File(path)
-                    if (file.exists()) {
-                        println("✅ VideoThumbnail: File exists: ${file.length()} bytes")
-                        thumbnailPath = path
-                    } else {
-                        println("❌ VideoThumbnail: File doesn't exist: $path")
-                    }
+                if (path != null && File(path).exists()) {
+                    thumbnailPath = path
                 } else {
-                    println("❌ VideoThumbnail: No thumbnail path returned")
+                    // If not cached, start generation and show loading
+                    isLoading = true
+                    val generatedPath = ThumbnailGenerator.getThumbnail(context, videoId, videoUri)
+                    if (generatedPath != null && File(generatedPath).exists()) {
+                        thumbnailPath = generatedPath
+                    }
+                    isLoading = false
                 }
             } catch (e: Exception) {
-                println("❌ VideoThumbnail: Error loading thumbnail: ${e.message}")
-                e.printStackTrace()
-            } finally {
                 isLoading = false
             }
         }
