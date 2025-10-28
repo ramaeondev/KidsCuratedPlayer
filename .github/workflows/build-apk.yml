@@ -47,21 +47,21 @@ jobs:
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: KidsCuratedPlayer-debug
-          path: app/build/outputs/apk/debug/KidsCuratedPlayer-v*.apk
+          name: YouKids-debug
+          path: app/build/outputs/apk/debug/YouKids-v*.apk
           retention-days: 30
       
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: KidsCuratedPlayer-release
-          path: app/build/outputs/apk/release/KidsCuratedPlayer-v*.apk
+          name: YouKids-release
+          path: app/build/outputs/apk/release/YouKids-v*.apk
           retention-days: 30
       
       - name: Get APK Info
         run: |
-          DEBUG_APK=$(ls app/build/outputs/apk/debug/KidsCuratedPlayer-*.apk | head -1)
-          RELEASE_APK=$(ls app/build/outputs/apk/release/KidsCuratedPlayer-*.apk | head -1)
+          DEBUG_APK=$(ls app/build/outputs/apk/debug/YouKids-*.apk | head -1)
+          RELEASE_APK=$(ls app/build/outputs/apk/release/YouKids-*.apk | head -1)
           echo "### 📱 APK Build Information" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "#### Debug APK:" >> $GITHUB_STEP_SUMMARY
@@ -81,16 +81,16 @@ jobs:
       - name: Create APKs with stable names for public download
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          DEBUG_APK=$(ls app/build/outputs/apk/debug/KidsCuratedPlayer-*.apk | head -1)
-          RELEASE_APK=$(ls app/build/outputs/apk/release/KidsCuratedPlayer-*.apk | head -1)
+          DEBUG_APK=$(ls app/build/outputs/apk/debug/YouKids-*.apk | head -1)
+          RELEASE_APK=$(ls app/build/outputs/apk/release/YouKids-*.apk | head -1)
           
           # Create stable names for latest builds
-          cp $DEBUG_APK KidsCuratedPlayer-latest-debug.apk
-          cp $RELEASE_APK KidsCuratedPlayer-latest.apk
+          cp $DEBUG_APK YouKids-latest-debug.apk
+          cp $RELEASE_APK YouKids-latest.apk
           
           # Create timestamped versions
-          cp $DEBUG_APK KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-debug.apk
-          cp $RELEASE_APK KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-release.apk
+          cp $DEBUG_APK YouKids-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-debug.apk
+          cp $RELEASE_APK YouKids-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-release.apk
       
       - name: Update Latest Release with APK (Public Download)
         uses: softprops/action-gh-release@v1
@@ -109,17 +109,17 @@ jobs:
             ### 📲 Quick Download:
             
             **🎯 Recommended (Smaller, Faster):**
-            - **[KidsCuratedPlayer-latest.apk](https://github.com/${{ github.repository }}/releases/download/latest/KidsCuratedPlayer-latest.apk)** - Release build
+            - **[YouKids-latest.apk](https://github.com/${{ github.repository }}/releases/download/latest/YouKids-latest.apk)** - Release build
             
             **🔧 Debug Version (Larger, More Info):**
-            - **[KidsCuratedPlayer-latest-debug.apk](https://github.com/${{ github.repository }}/releases/download/latest/KidsCuratedPlayer-latest-debug.apk)** - Debug build
+            - **[YouKids-latest-debug.apk](https://github.com/${{ github.repository }}/releases/download/latest/YouKids-latest-debug.apk)** - Debug build
             
             ### Installation Instructions:
             1. Download the APK file (release version recommended)
             2. Transfer to your Android device
             3. Settings → Security → Enable "Install from Unknown Sources"
             4. Tap the APK file to install
-            5. Launch "Kids Curated Player"
+            5. Launch "YouKids"
             
             ---
             
@@ -132,17 +132,17 @@ jobs:
             ### 🔗 Direct Download Links:
             **Release APK (Stable URL - always latest):**
             ```
-            https://github.com/${{ github.repository }}/releases/download/latest/KidsCuratedPlayer-latest.apk
+            https://github.com/${{ github.repository }}/releases/download/latest/YouKids-latest.apk
             ```
             
             **Debug APK (Stable URL - always latest):**
             ```
-            https://github.com/${{ github.repository }}/releases/download/latest/KidsCuratedPlayer-latest-debug.apk
+            https://github.com/${{ github.repository }}/releases/download/latest/YouKids-latest-debug.apk
             ```
             
             **Timestamped builds (this specific commit):**
-            - Release: `KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-release.apk`
-            - Debug: `KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-debug.apk`
+            - Release: `YouKids-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-release.apk`
+            - Debug: `YouKids-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-debug.apk`
             
             ### 📚 Documentation:
             - [Installation Guide](https://github.com/${{ github.repository }}/blob/main/INSTALLATION_GUIDE.md)
@@ -154,10 +154,10 @@ jobs:
             ⚠️ **Note:** This is a development build updated automatically with each push.
             For stable releases, check the [Releases page](https://github.com/${{ github.repository }}/releases).
           files: |
-            KidsCuratedPlayer-latest.apk
-            KidsCuratedPlayer-latest-debug.apk
-            KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-release.apk
-            KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-debug.apk
+            YouKids-latest.apk
+            YouKids-latest-debug.apk
+            YouKids-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-release.apk
+            YouKids-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-debug.apk
           draft: false
           prerelease: true
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -171,17 +171,17 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**📥 Release APK (Recommended - Smaller, Faster):**" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "https://github.com/${{ github.repository }}/releases/download/latest/KidsCuratedPlayer-latest.apk" >> $GITHUB_STEP_SUMMARY
+          echo "https://github.com/${{ github.repository }}/releases/download/latest/YouKids-latest.apk" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**� Debug APK (Larger, More Debug Info):**" >> $GITHUB_STEP_SUMMARY
+          echo "**🔧 Debug APK (Larger, More Debug Info):**" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "https://github.com/${{ github.repository }}/releases/download/latest/KidsCuratedPlayer-latest-debug.apk" >> $GITHUB_STEP_SUMMARY
+          echo "https://github.com/${{ github.repository }}/releases/download/latest/YouKids-latest-debug.apk" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**📦 Timestamped Builds:**" >> $GITHUB_STEP_SUMMARY
-          echo "- Release: KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-release.apk" >> $GITHUB_STEP_SUMMARY
-          echo "- Debug: KidsCuratedPlayer-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-debug.apk" >> $GITHUB_STEP_SUMMARY
+          echo "- Release: YouKids-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-release.apk" >> $GITHUB_STEP_SUMMARY
+          echo "- Debug: YouKids-${{ steps.commit.outputs.DATE }}-${{ steps.commit.outputs.SHORT_SHA }}-debug.apk" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**🌐 Release Page:**" >> $GITHUB_STEP_SUMMARY
           echo "https://github.com/${{ github.repository }}/releases/tag/latest" >> $GITHUB_STEP_SUMMARY

@@ -49,13 +49,14 @@ jobs:
       - name: Rename APK with version
         run: |
           VERSION=${{ steps.version.outputs.VERSION }}
-          cp app/build/outputs/apk/debug/app-debug.apk app-${VERSION}.apk
+          DEBUG_APK=$(ls app/build/outputs/apk/debug/YouKids-*.apk | head -1)
+          cp $DEBUG_APK YouKids-${VERSION}.apk
       
       - name: Create Release Notes
         id: release_notes
         run: |
           cat > release_notes.md << 'EOF'
-          ## 🎬 Kids Curated Player - Release ${{ steps.version.outputs.VERSION }}
+          ## 🎬 YouKids - Release ${{ steps.version.outputs.VERSION }}
           
           ### 📱 Download & Install
           
@@ -63,7 +64,7 @@ jobs:
           2. **Transfer** to your Android device
           3. **Enable** "Install from Unknown Sources" in Settings
           4. **Tap** the APK to install
-          5. **Launch** KidsCuratedPlayer
+          5. **Launch** YouKids
           
           ### ✨ Features
           
@@ -112,10 +113,10 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.version.outputs.VERSION }}
-          name: Kids Curated Player ${{ steps.version.outputs.VERSION }}
+          name: YouKids ${{ steps.version.outputs.VERSION }}
           body_path: release_notes.md
           files: |
-            app-${{ steps.version.outputs.VERSION }}.apk
+            YouKids-${{ steps.version.outputs.VERSION }}.apk
           draft: false
           prerelease: false
         env:
@@ -125,5 +126,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-apk-${{ steps.version.outputs.VERSION }}
-          path: app-${{ steps.version.outputs.VERSION }}.apk
+          path: YouKids-${{ steps.version.outputs.VERSION }}.apk
           retention-days: 90
