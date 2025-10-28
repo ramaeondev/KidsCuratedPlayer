@@ -6,35 +6,15 @@ License: GPL-3.0-or-later
 
 AuthorName: Ramaeon Dev
 AuthorEmail: rama@therama.dev
-AuthorWebSite: https://github.com/ramaeondev
+WebSite: https://github.com/ramaeondev/KidsCuratedPlayer
 
 SourceCode: https://github.com/ramaeondev/KidsCuratedPlayer
 IssueTracker: https://github.com/ramaeondev/KidsCuratedPlayer/issues
-Changelog: https://github.com/ramaeondev/KidsCuratedPlayer/blob/main/CHANGELOG.md
 
-Name: YouKids
-Summary: Safe video player for kids with parental control
-
-Description: |-
-    YouKids is a safe, parent-controlled video player designed to protect children 
-    from algorithmic content addiction and inappropriate videos.
-    
-    Features:
-    * Parent-curated content only
-    * No algorithms or recommendations
-    * No ads or tracking
-    * Privacy-first design (COPPA/GDPR compliant)
-    * Offline capable with device gallery videos
-    * Automatic video categorization
-    * Clean YouTube-style interface
-    * No accounts required
-    
-    YouKids puts parents back in control of what their children watch. Instead of 
-    YouTube's algorithm deciding content, you curate a safe collection of videos 
-    from your device gallery.
+AutoName: YouKids
 
 RepoType: git
-Repo: https://github.com/ramaeondev/KidsCuratedPlayer.git
+Repo: https://github.com/ramaeondev/KidsCuratedPlayer
 
 Builds:
   - versionName: 1.2.0
@@ -43,9 +23,8 @@ Builds:
     subdir: app
     gradle:
       - release
-    prebuild: sed -i -e '/signingConfig/d' build.gradle
 
-AutoUpdateMode: Version v%v
+AutoUpdateMode: Version
 UpdateCheckMode: Tags
 CurrentVersion: 1.2.0
 CurrentVersionCode: 3
