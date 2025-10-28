@@ -12,7 +12,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.kidscurated.player.data.VideoRepository
 import com.kidscurated.player.ui.theme.YouKidsTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     
@@ -20,7 +23,16 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            println("✅ Storage permission granted")
+            println("✅ Storage permission granted - scanning videos...")
+            // Immediately scan videos after permission granted
+            lifecycleScope.launch {
+                try {
+                    VideoRepository.scanLocalVideos()
+                    println("✅ Video scan completed")
+                } catch (e: Exception) {
+                    println("⚠️ Error scanning videos: ${e.message}")
+                }
+            }
         } else {
             println("⚠️ Storage permission denied - app will only show YouTube videos")
         }

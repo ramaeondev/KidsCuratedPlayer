@@ -245,6 +245,7 @@ object LocalVideoScanner {
     /**
      * Check if video is portrait/vertical (aspect ratio < 1 = portrait = short)
      * Returns true if height > width
+     * DEFAULT: Returns FALSE (regular video) if aspect ratio cannot be determined
      */
     private fun isPortraitVideo(videoPath: String): Boolean {
         var retriever: MediaMetadataRetriever? = null
@@ -275,12 +276,12 @@ object LocalVideoScanner {
                 return isPortrait
             }
             
-            println("⚠️ Could not determine video resolution for: $videoPath")
-            return false // Default to landscape if can't determine
+            println("⚠️ Could not determine video resolution for: $videoPath - defaulting to REGULAR video")
+            return false // DEFAULT: Treat as regular video if can't determine
             
         } catch (e: Exception) {
-            println("❌ Error reading video metadata: ${e.message}")
-            return false // Default to landscape on error
+            println("❌ Error reading video metadata: ${e.message} - defaulting to REGULAR video")
+            return false // DEFAULT: Treat as regular video on error
         } finally {
             try {
                 retriever?.release()

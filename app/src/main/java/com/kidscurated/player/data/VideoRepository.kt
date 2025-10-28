@@ -26,8 +26,33 @@ object VideoRepository {
     // Application context (set from Application class)
     private var appContext: Context? = null
     
+    // Gallery observer for auto-refresh
+    private var galleryObserver: GalleryObserver? = null
+    
     fun init(context: Context) {
         appContext = context.applicationContext
+        startObservingGallery()
+    }
+    
+    private fun startObservingGallery() {
+        val context = appContext ?: return
+        
+        galleryObserver = GalleryObserver(context) {
+            // Auto-refresh when gallery changes
+            refreshVideos()
+        }
+        galleryObserver?.register()
+    }
+    
+    fun stopObservingGallery() {
+        galleryObserver?.unregister()
+        galleryObserver = null
+    }
+    
+    // Force refresh videos (clears cache and rescans)
+    suspend fun refreshVideos() {
+        clearCache()
+        scanLocalVideos()
     }
     
     // Scan local storage for videos
@@ -36,6 +61,10 @@ object VideoRepository {
         return withContext(Dispatchers.IO) {
             try {
                 val videos = LocalVideoScanner.scanLocalVideos(context)
+                // Update cache immediately after scan
+                cachedVideos = videos.filter { !it.isShort }
+                cachedShorts = videos.filter { it.isShort }
+                lastScanTime = System.currentTimeMillis()
                 videos
             } catch (e: Exception) {
                 emptyList()

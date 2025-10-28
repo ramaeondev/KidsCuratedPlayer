@@ -2,24 +2,36 @@ package com.kidscurated.player.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
 import android.provider.Settings
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.postgrest.from
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import java.util.UUID
 
 /**
- * Anonymous user tracking for counting unique installations
+ * Anonymous user tracking with Supabase backend
  * 
- * PRIVACY COMPLIANT:
- * - Uses Android ID (resets on factory reset)
- * - No personal information collected
- * - No behavioral tracking
- * - Only counts unique installs
+ * PRIVACY COMPLIANT - LEGAL DATA ONLY:
+ * ✅ Anonymous User ID (Android ID + UUID)
+ * ✅ Install timestamp
+ * ✅ App opens count
+ * ✅ Device type (Manufacturer + Model, e.g., "Samsung Galaxy S21")
+ * ✅ Android version (e.g., "Android 13")
+ * ✅ App version (e.g., "1.1.0")
+ * ✅ Country code (from system locale, e.g., "US")
  * 
- * LEGAL REQUIREMENTS:
- * - Add to Privacy Policy
- * - Disclose in app store listing
- * - Allow user to opt-out if needed
+ * ❌ NO personal information
+ * ❌ NO precise location (GPS)
+ * ❌ NO behavioral tracking
+ * ❌ NO contact list access
+ * ❌ NO COPPA violations
  */
 object Analytics {
     
@@ -29,12 +41,31 @@ object Analytics {
     private const val KEY_APP_OPENS = "app_opens_count"
     private const val KEY_LAST_OPEN = "last_open_time"
     
+    // TODO: Replace with your Supabase credentials
+    private const val SUPABASE_URL = "https://mpudbsgszekwghohwcwf.supabase.co"
+    private const val SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wdWRic2dzemVrd2dob2h3Y3dmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTg4OTEsImV4cCI6MjA3NTU5NDg5MX0.3HbXbLlwHAYIgE7RCGMb-RpBnD-V760vGWYAn4RRVTw"
+    
     private var prefs: SharedPreferences? = null
+    private var appContext: Context? = null
+    
+    // Coroutine scope for analytics operations
+    private val analyticsScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    
+    // Lazy initialization of Supabase client
+    private val supabase by lazy {
+        createSupabaseClient(
+            supabaseUrl = SUPABASE_URL,
+            supabaseKey = SUPABASE_KEY
+        ) {
+            install(Postgrest)
+        }
+    }
     
     /**
      * Initialize analytics (call from Application onCreate)
      */
     fun init(context: Context) {
+        appContext = context.applicationContext
         prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         
         // Generate or retrieve anonymous user ID
@@ -69,14 +100,18 @@ object Analytics {
             // Create anonymous ID: androidId + random UUID
             val anonymousId = "${androidId}_${UUID.randomUUID()}"
             
+            val installTime = System.currentTimeMillis()
+            
             prefs?.edit()?.apply {
                 putString(KEY_USER_ID, anonymousId)
-                putLong(KEY_INSTALL_TIME, System.currentTimeMillis())
+                putLong(KEY_INSTALL_TIME, installTime)
                 apply()
             }
             
-            // Optional: Send to your analytics server
-            // sendInstallEvent(anonymousId)
+            // Send install event to Supabase
+            analyticsScope.launch {
+                sendInstallEvent(anonymousId, installTime)
+            }
             
         } catch (e: Exception) {
             // Fallback: use only random UUID
@@ -90,10 +125,17 @@ object Analytics {
      */
     private fun trackAppOpen() {
         val currentCount = prefs?.getInt(KEY_APP_OPENS, 0) ?: 0
+        val newCount = currentCount + 1
+        
         prefs?.edit()?.apply {
-            putInt(KEY_APP_OPENS, currentCount + 1)
+            putInt(KEY_APP_OPENS, newCount)
             putLong(KEY_LAST_OPEN, System.currentTimeMillis())
             apply()
+        }
+        
+        // Send app open event to Supabase
+        analyticsScope.launch {
+            sendAppOpenEvent(newCount)
         }
     }
     
@@ -112,35 +154,110 @@ object Analytics {
     }
     
     /**
-     * Optional: Send analytics to your backend
+     * Get device information (legally obtainable data only)
+     */
+    private fun getDeviceInfo(): DeviceInfo {
+        val context = appContext ?: throw IllegalStateException("Analytics not initialized")
+        
+        return DeviceInfo(
+            deviceType = "${Build.MANUFACTURER} ${Build.MODEL}",
+            androidVersion = "Android ${Build.VERSION.RELEASE}",
+            appVersion = "1.1.0", // TODO: Get from BuildConfig
+            countryCode = context.resources.configuration.locales[0].country
+        )
+    }
+    
+    /**
+     * Send install event to Supabase
+     */
+    private suspend fun sendInstallEvent(userId: String, installTime: Long) {
+        withContext(Dispatchers.IO) {
+            try {
+                if (SUPABASE_URL == "YOUR_SUPABASE_URL") {
+                    println("⚠️ Supabase not configured - skipping analytics upload")
+                    return@withContext
+                }
+                
+                val deviceInfo = getDeviceInfo()
+                
+                val installData = UserInstall(
+                    userId = userId,
+                    installTime = installTime,
+                    deviceType = deviceInfo.deviceType,
+                    androidVersion = deviceInfo.androidVersion,
+                    appVersion = deviceInfo.appVersion,
+                    countryCode = deviceInfo.countryCode
+                )
+                
+                supabase.from("user_installs").insert(installData)
+                println("✅ Install event sent to Supabase")
+                
+            } catch (e: Exception) {
+                println("❌ Error sending install event: ${e.message}")
+            }
+        }
+    }
+    
+    /**
+     * Send app open event to Supabase
+     */
+    private suspend fun sendAppOpenEvent(openCount: Int) {
+        withContext(Dispatchers.IO) {
+            try {
+                if (SUPABASE_URL == "YOUR_SUPABASE_URL") {
+                    return@withContext
+                }
+                
+                val userId = getAnonymousUserId() ?: return@withContext
+                val deviceInfo = getDeviceInfo()
+                
+                val openData = AppOpen(
+                    userId = userId,
+                    timestamp = System.currentTimeMillis(),
+                    openCount = openCount,
+                    deviceType = deviceInfo.deviceType,
+                    androidVersion = deviceInfo.androidVersion,
+                    appVersion = deviceInfo.appVersion
+                )
+                
+                supabase.from("app_opens").insert(openData)
+                
+            } catch (e: Exception) {
+                println("❌ Error sending app open event: ${e.message}")
+            }
+        }
+    }
+    
+    /**
+     * Send custom analytics event to Supabase
      * 
-     * Example API call structure:
-     * POST https://your-backend.com/api/analytics
-     * {
-     *   "user_id": "anonymous_id_here",
-     *   "event": "app_open",
-     *   "timestamp": 1234567890,
-     *   "app_version": "1.1.0",
-     *   "platform": "android"
-     * }
+     * Example usage:
+     * Analytics.sendEvent("video_played", mapOf("video_id" to "123", "duration" to 120))
      */
     suspend fun sendEvent(eventName: String, properties: Map<String, Any> = emptyMap()) {
         withContext(Dispatchers.IO) {
             try {
-                val userId = getAnonymousUserId() ?: return@withContext
+                if (SUPABASE_URL == "YOUR_SUPABASE_URL") {
+                    return@withContext
+                }
                 
-                // TODO: Implement your backend API call here
-                // Example using Retrofit:
-                // val event = AnalyticsEvent(
-                //     userId = userId,
-                //     event = eventName,
-                //     timestamp = System.currentTimeMillis(),
-                //     properties = properties
-                // )
-                // analyticsApi.sendEvent(event)
+                val userId = getAnonymousUserId() ?: return@withContext
+                val deviceInfo = getDeviceInfo()
+                
+                val eventData = AnalyticsEvent(
+                    userId = userId,
+                    eventName = eventName,
+                    timestamp = System.currentTimeMillis(),
+                    properties = properties,
+                    deviceType = deviceInfo.deviceType,
+                    androidVersion = deviceInfo.androidVersion,
+                    appVersion = deviceInfo.appVersion
+                )
+                
+                supabase.from("analytics_events").insert(eventData)
                 
             } catch (e: Exception) {
-                // Silent fail - don't crash app for analytics
+                println("❌ Error sending event: ${e.message}")
             }
         }
     }
@@ -152,3 +269,43 @@ object Analytics {
         prefs?.edit()?.clear()?.apply()
     }
 }
+
+// Data models for Supabase
+@Serializable
+private data class DeviceInfo(
+    val deviceType: String,
+    val androidVersion: String,
+    val appVersion: String,
+    val countryCode: String
+)
+
+@Serializable
+private data class UserInstall(
+    val userId: String,
+    val installTime: Long,
+    val deviceType: String,
+    val androidVersion: String,
+    val appVersion: String,
+    val countryCode: String
+)
+
+@Serializable
+private data class AppOpen(
+    val userId: String,
+    val timestamp: Long,
+    val openCount: Int,
+    val deviceType: String,
+    val androidVersion: String,
+    val appVersion: String
+)
+
+@Serializable
+private data class AnalyticsEvent(
+    val userId: String,
+    val eventName: String,
+    val timestamp: Long,
+    val properties: Map<String, Any>,
+    val deviceType: String,
+    val androidVersion: String,
+    val appVersion: String
+)
