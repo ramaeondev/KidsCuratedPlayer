@@ -1,0 +1,72 @@
+YouKids is a safe, parent-controlled video player designed to protect children from algorithmic content addiction and inappropriate videos.
+
+🎯 Key Features:
+
+• Parent-Curated Content - Only videos you approve
+• No Algorithms - No recommendations, no infinite scrolling
+• No Ads - Clean, distraction-free experience
+• Offline Capable - Videos from device gallery
+• Privacy-First - Minimal data collection, COPPA/GDPR compliant
+• Simple Interface - YouTube-like UI kids understand
+• No Accounts - No login or signup required
+
+👨‍👩‍👧‍👦 For Parents:
+
+YouKids puts parents back in control of what their children watch. Instead of YouTube's algorithm deciding content, you curate a safe collection of videos from your device gallery.
+
+📱 How It Works:
+
+1. Add approved videos to your device
+2. YouKids automatically scans and categorizes them
+3. Kids browse only parent-approved content
+4. Videos are organized into Home (regular) and Shorts tabs
+5. Simple, familiar YouTube-style interface
+
+🔒 Privacy & Safety:
+
+• No tracking or behavioral analytics
+• No personal information collected
+• Optional anonymous usage statistics (can be disabled)
+• COPPA, GDPR, and CCPA compliant
+• No third-party advertising or analytics
+• Open source - fully auditable code
+
+✨ Smart Features:
+
+• Automatic video categorization (regular videos vs shorts)
+• High-quality thumbnail generation
+• Auto-refresh when videos are added/deleted
+• Portrait videos automatically go to Shorts tab
+• Landscape videos go to Home tab
+
+🎨 Clean Interface:
+
+• YouTube-inspired design kids recognize
+• No cluttered menus or settings
+• Focus on video playback
+• Age-appropriate navigation
+
+📖 Technical Details:
+
+• Minimum Android: 7.0 (API 24)
+• Target Android: 14 (API 34)
+• Permissions: Storage (to read videos)
+• Size: ~14 MB (release) / ~21 MB (debug)
+• Architecture: Universal (ARM, x86)
+• Built with: Kotlin, Jetpack Compose
+
+🆓 100% Free & Open Source:
+
+• No in-app purchases
+• No subscriptions
+• No premium features
+• No hidden costs
+• GPL-3.0 License
+
+YouKids is perfect for:
+- Parents wanting control over kids' screen time
+- Families seeking algorithm-free entertainment
+- Anyone protecting children from content addiction
+- Households wanting privacy-respecting apps
+
+Built with ❤️ by parents, for parents protecting their kids from the dangers of algorithmic content platforms.

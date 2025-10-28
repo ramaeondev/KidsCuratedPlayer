@@ -1,0 +1,9 @@
+• Initial release of YouKids
+• Parent-curated video player for kids
+• Automatic video scanning from device gallery
+• Smart categorization (regular videos vs shorts)
+• High-quality thumbnail generation
+• Privacy-compliant analytics (optional)
+• No algorithms, no ads, no tracking
+• Clean YouTube-style interface
+• Auto-refresh on gallery changes
