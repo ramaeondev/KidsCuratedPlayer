@@ -4,18 +4,24 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     
-    <!-- Background Circle (YouTube Red) -->
+    <!-- YouTube-style rounded rectangle background (YouTube Red #FF0000) -->
     <path
         android:fillColor="#FF0000"
-        android:pathData="M54,54m-50,0a50,50 0,1 1,100 0a50,50 0,1 1,-100 0"/>
+        android:pathData="M18,24C18,19.582 21.582,16 26,16L82,16C86.418,16 90,19.582 90,24L90,84C90,88.418 86.418,92 82,92L26,92C21.582,92 18,88.418 18,84Z"/>
     
-    <!-- Play Triangle (White) -->
+    <!-- White Play Triangle (YouTube style) -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M42,38L42,70L70,54Z"/>
+        android:pathData="M44,38L44,70L70,54Z"/>
     
-    <!-- Kids Badge - Star in corner -->
+    <!-- "Y" for YouKids - positioned at top right -->
     <path
         android:fillColor="#FFD700"
-        android:pathData="M84,24l-4,8l-8,1l6,6l-2,8l8,-4l8,4l-2,-8l6,-6l-8,-1z"/>
+        android:fillType="evenOdd"
+        android:pathData="M74,28 L78,28 L78,34 L82,28 L86,28 L81,35 L81,42 L78,42 L78,35 L74,28 Z"/>
+    
+    <!-- Small kids star accent at bottom right -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M82,78 L81,80.5 L78.5,80.5 L80.5,82 L79.5,84.5 L82,83 L84.5,84.5 L83.5,82 L85.5,80.5 L83,80.5 Z"/>
 </vector>

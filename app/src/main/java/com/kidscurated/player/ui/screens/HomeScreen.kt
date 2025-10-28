@@ -239,14 +239,6 @@ fun VideoItem(video: Video, onClick: () -> Unit) {
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            
-            IconButton(onClick = { /* Menu */ }) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "More",
-                    tint = Color.White
-                )
-            }
         }
     }
 }

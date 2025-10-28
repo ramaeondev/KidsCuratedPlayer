@@ -12,7 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
-import com.kidscurated.player.ui.theme.KidsCuratedPlayerTheme
+import com.kidscurated.player.ui.theme.YouKidsTheme
 
 class MainActivity : ComponentActivity() {
     
@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
         requestStoragePermission()
         
         setContent {
-            KidsCuratedPlayerTheme {
+            YouKidsTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

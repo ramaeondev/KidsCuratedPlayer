@@ -252,13 +252,6 @@ fun VideosLibrary(navController: NavController?) {
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
-                
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "More",
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
             }
         }
     }

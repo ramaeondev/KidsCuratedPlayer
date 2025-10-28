@@ -47,13 +47,13 @@ fun YouTubeApp() {
                         ) {
                             Icon(
                                 imageVector = Icons.Default.PlayArrow,
-                                contentDescription = "YouTube",
+                                contentDescription = "YouKids",
                                 tint = Color.Red,
                                 modifier = Modifier.size(32.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                "KidsTube",
+                                "YouKids",
                                 style = MaterialTheme.typography.headlineSmall,
                                 color = Color.White
                             )
@@ -62,15 +62,7 @@ fun YouTubeApp() {
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Black,
                         titleContentColor = Color.White
-                    ),
-                    actions = {
-                        IconButton(onClick = { /* Search action */ }) {
-                            Icon(Icons.Default.Search, "Search", tint = Color.White)
-                        }
-                        IconButton(onClick = { /* Notifications */ }) {
-                            Icon(Icons.Default.Notifications, "Notifications", tint = Color.White)
-                        }
-                    }
+                    )
                 )
             }
         },
