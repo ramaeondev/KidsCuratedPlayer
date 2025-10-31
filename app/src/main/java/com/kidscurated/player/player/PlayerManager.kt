@@ -4,16 +4,14 @@ import android.content.Context
 import com.google.android.exoplayer2.DefaultLoadControl
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.RenderersFactory
-import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
-import com.google.android.exoplayer2.upstream.cache.CacheDataSource
 import com.google.android.exoplayer2.util.Util
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
 
 /**
- * Singleton ExoPlayer manager with tuned LoadControl and cache-enabled DataSource for
+ * Singleton ExoPlayer manager with tuned LoadControl and DataSource for
  * fast startup and hardware-accelerated playback.
  */
 object PlayerManager {
@@ -39,19 +37,20 @@ object PlayerManager {
                     .setUserAgent(Util.getUserAgent(context, "YouKids"))
                     .setAllowCrossProtocolRedirects(true)
 
-                // Wrap with cache for remote URIs
-                val cacheFactory = CacheDataSource.Factory()
-                    .setCache(VideoCache.get())
-                    .setUpstreamDataSourceFactory(httpFactory)
-                    .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+                // DataSource that handles file/content/http(s)
+                val dataSourceFactory = DefaultDataSourceFactory(
+                    context,
+                    httpFactory
+                )
+
+                val mediaSourceFactory = ProgressiveMediaSource.Factory(
+                    dataSourceFactory
+                )
 
                 player = ExoPlayer.Builder(context)
                     .setLoadControl(loadControl)
                     .setTrackSelector(trackSelector)
-                    .setMediaSourceFactory(
-                        // DefaultDataSourceFactory handles file://, content:// and http(s)
-                        DefaultDataSourceFactory(context, httpFactory)
-                    )
+                    .setMediaSourceFactory(mediaSourceFactory)
                     .build()
             }
         }

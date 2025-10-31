@@ -34,7 +34,7 @@ fun LocalVideoPlayer(
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
                 useController = true
-                player = PlayerManager.get()
+                this.player = PlayerManager.get()
             }
         },
         modifier = modifier
