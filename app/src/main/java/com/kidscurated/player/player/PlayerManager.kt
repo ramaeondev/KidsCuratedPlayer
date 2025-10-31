@@ -45,13 +45,20 @@ object PlayerManager {
                     .setUpstreamDataSourceFactory(httpFactory)
                     .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
 
+                // DataSource that handles file/content/http(s)
+                val dataSourceFactory = DefaultDataSourceFactory(
+                    context,
+                    httpFactory
+                )
+
+                val mediaSourceFactory = com.google.android.exoplayer2.source.ProgressiveMediaSource.Factory(
+                    dataSourceFactory
+                )
+
                 player = ExoPlayer.Builder(context)
                     .setLoadControl(loadControl)
                     .setTrackSelector(trackSelector)
-                    .setMediaSourceFactory(
-                        // DefaultDataSourceFactory handles file://, content:// and http(s)
-                        DefaultDataSourceFactory(context, httpFactory)
-                    )
+                    .setMediaSourceFactory(mediaSourceFactory)
                     .build()
             }
         }
