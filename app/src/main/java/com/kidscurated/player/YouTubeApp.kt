@@ -2,6 +2,7 @@ package com.kidscurated.player
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.Image
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -9,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -45,10 +47,9 @@ fun YouTubeApp() {
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Start
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = "YouKids",
-                                tint = Color.Red,
+                            Image(
+                                painter = painterResource(id = R.drawable.app_logo),
+                                contentDescription = "YouKids Logo",
                                 modifier = Modifier.size(32.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
