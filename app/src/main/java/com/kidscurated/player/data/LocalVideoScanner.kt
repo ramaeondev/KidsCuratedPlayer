@@ -50,6 +50,23 @@ object LocalVideoScanner {
     }
     
     /**
+     * Progressively scans videos and emits each one as it's found
+     * Callback is invoked for each video immediately after discovery
+     */
+    suspend fun scanLocalVideosProgressively(
+        context: Context,
+        onVideoFound: (Video) -> Unit
+    ) {
+        withContext(Dispatchers.IO) {
+            try {
+                scanAllDeviceVideosProgressively(context, onVideoFound)
+            } catch (e: Exception) {
+                // Silently handle errors
+            }
+        }
+    }
+    
+    /**
      * Scans the Movies/KidsVideos folder specifically
      */
     private fun scanKidsVideosFolder(context: Context): List<Video> {
@@ -135,6 +152,61 @@ object LocalVideoScanner {
         }
         
         return videos
+    }
+    
+    /**
+     * Progressively scans all videos and invokes callback for each one immediately
+     */
+    private fun scanAllDeviceVideosProgressively(
+        context: Context,
+        onVideoFound: (Video) -> Unit
+    ) {
+        val contentResolver: ContentResolver = context.contentResolver
+        
+        val projection = arrayOf(
+            MediaStore.Video.Media._ID,
+            MediaStore.Video.Media.DISPLAY_NAME,
+            MediaStore.Video.Media.DURATION,
+            MediaStore.Video.Media.SIZE,
+            MediaStore.Video.Media.DATA
+        )
+        
+        val sortOrder = "${MediaStore.Video.Media.DATE_ADDED} DESC"
+        
+        contentResolver.query(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            projection,
+            null,
+            null,
+            sortOrder
+        )?.use { cursor ->
+            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
+            val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
+            val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
+            val pathColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
+            
+            while (cursor.moveToNext()) {
+                val id = cursor.getLong(idColumn)
+                val name = cursor.getString(nameColumn)
+                val duration = cursor.getLong(durationColumn)
+                val path = cursor.getString(pathColumn)
+                
+                // Include ALL videos from device gallery
+                val contentUri = Uri.withAppendedPath(
+                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                    id.toString()
+                )
+                
+                val video = parseVideoFromMediaStore(contentUri, name, duration, path)
+                if (video != null) {
+                    // Immediately callback with this video
+                    onVideoFound(video)
+                    
+                    // Generate thumbnail for this video immediately in background
+                    ThumbnailGenerator.generateThumbnailAsync(context, video)
+                }
+            }
+        }
     }
     
     /**

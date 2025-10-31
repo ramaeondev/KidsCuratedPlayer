@@ -28,25 +28,30 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(navController: NavController) {
     var videos by remember { mutableStateOf<List<Video>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     
     // Track thumbnail generation progress
     val thumbnailProgress by com.kidscurated.player.data.ThumbnailGenerator.progress.collectAsState()
     
-    // Fetch videos on first composition
+    // Progressive video loading - videos appear immediately as they're found
     LaunchedEffect(Unit) {
         scope.launch {
             try {
-                // Don't block UI - load videos immediately
-                videos = VideoRepository.getAllVideos()
+                VideoRepository.getAllVideosProgressively().collect { videoList ->
+                    videos = videoList
+                    isLoading = videoList.isEmpty() // Only show loading if no videos yet
+                    errorMessage = null
+                }
+                
+                // After flow completes, check if we actually got any videos
                 if (videos.isEmpty()) {
                     errorMessage = "No videos found in your gallery.\n\nPlease add some videos to your device and reopen the app."
-                } else {
-                    errorMessage = null
                 }
             } catch (e: Exception) {
                 errorMessage = "Unable to load videos.\n\nPlease ensure storage permission is granted."
+                isLoading = false
             }
         }
     }

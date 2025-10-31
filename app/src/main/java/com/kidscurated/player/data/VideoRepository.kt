@@ -2,6 +2,10 @@ package com.kidscurated.player.data
 
 import android.content.Context
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 
 data class Video(
@@ -84,6 +88,31 @@ object VideoRepository {
         return cachedVideos ?: emptyList()
     }
     
+    // Progressive video loading - emits videos as they're found
+    fun getAllVideosProgressively(): Flow<List<Video>> = callbackFlow {
+        val context = appContext ?: throw IllegalStateException("VideoRepository not initialized")
+        
+        // Emit cached videos immediately if available
+        cachedVideos?.let { 
+            trySend(it)
+        }
+        
+        // Then scan for new videos progressively
+        val videos = mutableListOf<Video>()
+        LocalVideoScanner.scanLocalVideosProgressively(context) { video ->
+            if (!video.isShort) {
+                videos.add(video)
+                trySend(videos.toList()) // Emit updated list immediately
+            }
+        }
+        
+        // Update cache after scan completes
+        cachedVideos = videos
+        lastScanTime = System.currentTimeMillis()
+        
+        awaitClose { }
+    }.flowOn(Dispatchers.IO)
+    
     // Get all shorts with caching
     suspend fun getAllShorts(): List<Video> {
         val currentTime = System.currentTimeMillis()
@@ -95,6 +124,31 @@ object VideoRepository {
         }
         return cachedShorts ?: emptyList()
     }
+    
+    // Progressive shorts loading - emits videos as they're found
+    fun getAllShortsProgressively(): Flow<List<Video>> = callbackFlow {
+        val context = appContext ?: throw IllegalStateException("VideoRepository not initialized")
+        
+        // Emit cached shorts immediately if available
+        cachedShorts?.let { 
+            trySend(it)
+        }
+        
+        // Then scan for new videos progressively
+        val shorts = mutableListOf<Video>()
+        LocalVideoScanner.scanLocalVideosProgressively(context) { video ->
+            if (video.isShort) {
+                shorts.add(video)
+                trySend(shorts.toList()) // Emit updated list immediately
+            }
+        }
+        
+        // Update cache after scan completes
+        cachedShorts = shorts
+        lastScanTime = System.currentTimeMillis()
+        
+        awaitClose { }
+    }.flowOn(Dispatchers.IO)
     
     // Get video by ID
     fun getVideoById(videoId: String): Video? {

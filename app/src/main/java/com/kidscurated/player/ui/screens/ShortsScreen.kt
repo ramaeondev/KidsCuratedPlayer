@@ -32,16 +32,18 @@ fun ShortsScreen(navController: NavController) {
     // Track thumbnail generation progress
     val thumbnailProgress by com.kidscurated.player.data.ThumbnailGenerator.progress.collectAsState()
     
-    // Fetch shorts on first composition
+    // Progressive shorts loading - appear immediately as they're found
     LaunchedEffect(Unit) {
         scope.launch {
             try {
-                // Don't block UI - load shorts immediately
-                shorts = VideoRepository.getAllShorts()
+                VideoRepository.getAllShortsProgressively().collect { shortsList ->
+                    shorts = shortsList
+                    errorMessage = null
+                }
+                
+                // After flow completes, check if we actually got any shorts
                 if (shorts.isEmpty()) {
                     errorMessage = "No shorts found in your gallery.\n\nAdd some portrait/vertical videos to your device."
-                } else {
-                    errorMessage = null
                 }
             } catch (e: Exception) {
                 errorMessage = "Unable to load shorts.\n\nPlease ensure storage permission is granted."

@@ -4,9 +4,12 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
@@ -32,6 +35,9 @@ object ThumbnailGenerator {
     
     private val _progress = MutableStateFlow(GenerationProgress())
     val progress: StateFlow<GenerationProgress> = _progress
+    
+    // Background scope for async thumbnail generation
+    private val thumbnailScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     
     fun resetProgress() {
         _progress.value = GenerationProgress()
@@ -109,6 +115,23 @@ object ThumbnailGenerator {
                 isComplete = true
             )
             onProgress?.invoke(videos.size, videos.size)
+        }
+    }
+    
+    /**
+     * Generate thumbnail for a single video asynchronously (non-blocking)
+     * Fire-and-forget style - launches in background scope
+     */
+    fun generateThumbnailAsync(context: Context, video: Video) {
+        thumbnailScope.launch {
+            try {
+                val thumbnailFile = getThumbnailFile(context, video.id)
+                if (!thumbnailFile.exists()) {
+                    getThumbnail(context, video.id, video.youtubeUrl)
+                }
+            } catch (e: Exception) {
+                // Silently fail for async generation
+            }
         }
     }
     
