@@ -28,7 +28,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(navController: NavController) {
     var videos by remember { mutableStateOf<List<Video>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     
@@ -39,7 +38,7 @@ fun HomeScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         scope.launch {
             try {
-                isLoading = true
+                // Don't block UI - load videos immediately
                 videos = VideoRepository.getAllVideos()
                 if (videos.isEmpty()) {
                     errorMessage = "No videos found in your gallery.\n\nPlease add some videos to your device and reopen the app."
@@ -48,31 +47,13 @@ fun HomeScreen(navController: NavController) {
                 }
             } catch (e: Exception) {
                 errorMessage = "Unable to load videos.\n\nPlease ensure storage permission is granted."
-            } finally {
-                isLoading = false
             }
         }
     }
     
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         when {
-            isLoading -> {
-                Column(
-                    modifier = Modifier.align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator(
-                        color = Color.Red
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Loading videos...",
-                        color = Color.White,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-            errorMessage != null -> {
+            errorMessage != null && videos.isEmpty() -> {
                 Column(
                     modifier = Modifier
                         .align(Alignment.Center)

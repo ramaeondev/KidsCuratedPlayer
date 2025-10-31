@@ -83,7 +83,6 @@ fun LibraryScreen(navController: NavController? = null) {
 @Composable
 fun VideosLibrary(navController: NavController?) {
     var videos by remember { mutableStateOf<List<Video>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     
@@ -93,28 +92,20 @@ fun VideosLibrary(navController: NavController?) {
     LaunchedEffect(Unit) {
         scope.launch {
             try {
-                isLoading = true
+                // Don't block UI - load videos immediately
                 videos = VideoRepository.getAllVideos()
                 if (videos.isEmpty()) {
                     errorMessage = "No videos found in your gallery"
                 }
             } catch (e: Exception) {
                 errorMessage = "Unable to load videos"
-            } finally {
-                isLoading = false
             }
         }
     }
     
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         when {
-            isLoading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
-                    color = Color.Red
-                )
-            }
-            errorMessage != null -> {
+            errorMessage != null && videos.isEmpty() -> {
                 Text(
                     text = errorMessage ?: "",
                     color = Color.White,
@@ -264,7 +255,6 @@ fun VideosLibrary(navController: NavController?) {
 @Composable
 fun ShortsLibrary(navController: NavController?) {
     var shorts by remember { mutableStateOf<List<Video>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     
@@ -274,28 +264,20 @@ fun ShortsLibrary(navController: NavController?) {
     LaunchedEffect(Unit) {
         scope.launch {
             try {
-                isLoading = true
+                // Don't block UI - load shorts immediately
                 shorts = VideoRepository.getAllShorts()
                 if (shorts.isEmpty()) {
                     errorMessage = "No shorts found in your gallery"
                 }
             } catch (e: Exception) {
                 errorMessage = "Unable to load shorts"
-            } finally {
-                isLoading = false
             }
         }
     }
     
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         when {
-            isLoading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
-                    color = Color.Red
-                )
-            }
-            errorMessage != null -> {
+            errorMessage != null && shorts.isEmpty() -> {
                 Text(
                     text = errorMessage ?: "",
                     color = Color.White,

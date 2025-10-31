@@ -26,7 +26,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun ShortsScreen(navController: NavController) {
     var shorts by remember { mutableStateOf<List<Video>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     
@@ -37,7 +36,7 @@ fun ShortsScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         scope.launch {
             try {
-                isLoading = true
+                // Don't block UI - load shorts immediately
                 shorts = VideoRepository.getAllShorts()
                 if (shorts.isEmpty()) {
                     errorMessage = "No shorts found in your gallery.\n\nAdd some portrait/vertical videos to your device."
@@ -46,31 +45,13 @@ fun ShortsScreen(navController: NavController) {
                 }
             } catch (e: Exception) {
                 errorMessage = "Unable to load shorts.\n\nPlease ensure storage permission is granted."
-            } finally {
-                isLoading = false
             }
         }
     }
     
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         when {
-            isLoading -> {
-                Column(
-                    modifier = Modifier.align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator(
-                        color = Color.Red
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Loading shorts...",
-                        color = Color.White,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-            errorMessage != null -> {
+            errorMessage != null && shorts.isEmpty() -> {
                 Column(
                     modifier = Modifier
                         .align(Alignment.Center)
