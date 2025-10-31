@@ -62,9 +62,16 @@ fun VideoPlayerScreen(videoId: String, navController: NavController) {
                 )
                 .background(Color.Black)
         ) {
-            AndroidView(
-                factory = {
-                    WebView(context).apply {
+            if (isLocalVideo) {
+                // Use ExoPlayer for local files for instant, hardware-accelerated playback
+                com.kidscurated.player.ui.components.LocalVideoPlayer(
+                    videoUri = videoUrl,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                AndroidView(
+                    factory = {
+                        WebView(context).apply {
                         layoutParams = ViewGroup.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT
@@ -105,51 +112,17 @@ fun VideoPlayerScreen(videoId: String, navController: NavController) {
                             }
                         }
                         
-                        // Load video based on source type
-                        if (isLocalVideo) {
-                            // Load local video using HTML5 video player
-                            val html = """
-                                <!DOCTYPE html>
-                                <html>
-                                <head>
-                                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                    <style>
-                                        * { margin: 0; padding: 0; }
-                                        body { 
-                                            background: black; 
-                                            display: flex;
-                                            align-items: center;
-                                            justify-content: center;
-                                            height: 100vh;
-                                        }
-                                        video { 
-                                            width: 100%; 
-                                            height: 100%; 
-                                            object-fit: contain;
-                                        }
-                                    </style>
-                                </head>
-                                <body>
-                                    <video controls autoplay playsinline controlsList="nodownload">
-                                        <source src="$videoUrl" type="video/mp4">
-                                        Your browser does not support the video tag.
-                                    </video>
-                                </body>
-                                </html>
-                            """.trimIndent()
-                            loadDataWithBaseURL(null, html, "text/html", "utf-8", null)
+                        // Load YouTube video
+                        if (isShort) {
+                            loadUrl("https://m.youtube.com/shorts/$videoId")
                         } else {
-                            // Load YouTube video
-                            if (isShort) {
-                                loadUrl("https://m.youtube.com/shorts/$videoId")
-                            } else {
-                                loadUrl("https://m.youtube.com/watch?v=$videoId")
-                            }
+                            loadUrl("https://m.youtube.com/watch?v=$videoId")
                         }
                     }
                 },
                 modifier = Modifier.fillMaxSize()
             )
+            }
         }
         
         // Video details - Only show for regular videos, not shorts
