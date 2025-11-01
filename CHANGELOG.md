@@ -2,6 +2,34 @@
 
 All notable changes to YouKids will be documented in this file.
 
+## [2.0.0] - 2025-11-01
+
+### 🚀 Major Changes
+
+- Local videos only: removed YouTube/WebView/iframes entirely
+- ExoPlayer-only playback with hardware acceleration enabled by default
+- Progressive loading: videos and thumbnails appear as scanning progresses
+- Smarter caching for thumbnails and video data
+- Unified app icon/logo across app and metadata
+
+### 🔧 Technical Notes
+
+- Removed YouTube Android Player dependency and WebView-based playback
+- Added global ExoPlayer with SimpleCache and OkHttp extension
+- Coil configured with video frame extraction for thumbnails
+- BuildConfig fields for Supabase moved to Gradle with safe defaults; guarded usage
+- Version bump: versionCode 4, versionName 2.0.0
+
+### 📄 Docs & CI
+
+- Release notes template updated to reflect local-only playback
+- Parent Safety Guide updated: internet not required for local playback
+
+### ⚠️ Compatibility
+
+- Only local file/content URIs are playable; remote links/YouTube are no longer supported
+
+
 ## [1.2.0] - 2024-10-28
 
 ### 🎯 Major Features

@@ -1,9 +1,4 @@
 package com.kidscurated.player.ui.screens
-
-import android.view.ViewGroup
-import android.webkit.WebChromeClient
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,9 +12,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.kidscurated.player.data.VideoRepository
+import com.kidscurated.player.ui.components.LocalVideoPlayer
 
 @Composable
 fun VideoPlayerScreen(videoId: String, navController: NavController) {
@@ -27,8 +22,7 @@ fun VideoPlayerScreen(videoId: String, navController: NavController) {
     val context = LocalContext.current
     val isShort = video?.isShort == true
     val videoUrl = video?.youtubeUrl ?: ""
-    
-    // Detect if it's a local file URI
+    // Treat only file:// or content:// as playable. Anything else is unsupported.
     val isLocalVideo = videoUrl.startsWith("file://") || videoUrl.startsWith("content://")
     
     Column(
@@ -49,7 +43,7 @@ fun VideoPlayerScreen(videoId: String, navController: NavController) {
             )
         }
         
-        // YouTube Player - Full screen for shorts, 16:9 for regular videos
+        // Player area - Full screen for shorts, 16:9 for regular videos
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -63,65 +57,22 @@ fun VideoPlayerScreen(videoId: String, navController: NavController) {
                 .background(Color.Black)
         ) {
             if (isLocalVideo) {
-                // Use ExoPlayer for local files for instant, hardware-accelerated playback
-                com.kidscurated.player.ui.components.LocalVideoPlayer(
+                // Use ExoPlayer for local files
+                LocalVideoPlayer(
                     videoUri = videoUrl,
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
-                AndroidView(
-                    factory = {
-                        WebView(context).apply {
-                        layoutParams = ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT
-                        )
-                        settings.javaScriptEnabled = true
-                        settings.domStorageEnabled = true
-                        settings.mediaPlaybackRequiresUserGesture = false
-                        settings.loadWithOverviewMode = true
-                        settings.useWideViewPort = true
-                        
-                        // Use mobile user agent for all videos to fix playback issues
-                        settings.userAgentString = "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36"
-                        
-                        webChromeClient = WebChromeClient()
-                        
-                        // Custom WebViewClient to prevent navigation away from our video
-                        webViewClient = object : WebViewClient() {
-                            override fun shouldOverrideUrlLoading(
-                                view: WebView?,
-                                request: android.webkit.WebResourceRequest?
-                            ): Boolean {
-                                val url = request?.url?.toString() ?: return false
-                                
-                                // For local videos, don't block anything
-                                if (url.startsWith("file://") || url.startsWith("content://")) {
-                                    return false
-                                }
-                                
-                                // Allow loading our specific video URLs for YouTube
-                                if (url.contains("youtube.com/shorts/$videoId") ||
-                                    url.contains("youtube.com/embed/$videoId") ||
-                                    url.contains("youtube.com/watch?v=$videoId")) {
-                                    return false // Allow loading
-                                }
-                                
-                                // Block any other navigation (prevents scrolling to other YouTube videos)
-                                return true // Block loading
-                            }
-                        }
-                        
-                        // Load YouTube video
-                        if (isShort) {
-                            loadUrl("https://m.youtube.com/shorts/$videoId")
-                        } else {
-                            loadUrl("https://m.youtube.com/watch?v=$videoId")
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxSize()
-            )
+                // Non-local sources are not supported anymore
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Only local videos are supported",
+                        color = Color.White
+                    )
+                }
             }
         }
         

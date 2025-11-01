@@ -61,7 +61,19 @@ object VideoRepository {
     
     // Scan local storage for videos
     suspend fun scanLocalVideos(): List<Video> {
-        val context = appContext ?: throw IllegalStateException("VideoRepository not initialized")
+        return when (val result = scanLocalVideosResult()) {
+            is Result.Success -> result.data
+            is Result.Error -> emptyList() // Backward compatibility
+            is Result.Loading -> emptyList()
+        }
+    }
+    
+    // Scan local storage for videos with proper error handling
+    suspend fun scanLocalVideosResult(): Result<List<Video>> {
+        val context = appContext ?: return Result.Error(
+            message = "VideoRepository not initialized. Call init() first.",
+            errorCode = -1
+        )
         return withContext(Dispatchers.IO) {
             try {
                 val videos = LocalVideoScanner.scanLocalVideos(context)
@@ -69,23 +81,46 @@ object VideoRepository {
                 cachedVideos = videos.filter { !it.isShort }
                 cachedShorts = videos.filter { it.isShort }
                 lastScanTime = System.currentTimeMillis()
-                videos
+                Result.Success(videos)
+            } catch (e: SecurityException) {
+                Result.Error(
+                    message = "Storage permission denied. Please grant permission to access videos.",
+                    throwable = e,
+                    errorCode = 403
+                )
             } catch (e: Exception) {
-                emptyList()
+                Result.Error(
+                    message = "Failed to scan videos: ${e.message ?: "Unknown error"}",
+                    throwable = e,
+                    errorCode = -1
+                )
             }
         }
     }
     
     // Get all videos with caching
     suspend fun getAllVideos(): List<Video> {
+        return when (val result = getAllVideosResult()) {
+            is Result.Success -> result.data
+            is Result.Error -> emptyList() // Backward compatibility
+            is Result.Loading -> emptyList()
+        }
+    }
+    
+    // Get all videos with proper error handling
+    suspend fun getAllVideosResult(): Result<List<Video>> {
         val currentTime = System.currentTimeMillis()
         if (cachedVideos == null || currentTime - lastScanTime > CACHE_DURATION) {
-            val allVideos = scanLocalVideos()
-            cachedVideos = allVideos.filter { !it.isShort }
-            cachedShorts = allVideos.filter { it.isShort }
-            lastScanTime = currentTime
+            return scanLocalVideosResult().also { result ->
+                if (result is Result.Success) {
+                    val allVideos = result.data
+                    cachedVideos = allVideos.filter { !it.isShort }
+                    cachedShorts = allVideos.filter { it.isShort }
+                    lastScanTime = currentTime
+                }
+            }
         }
-        return cachedVideos ?: emptyList()
+        return Result.Success(cachedVideos ?: emptyList())
     }
     
     // Progressive video loading - emits videos as they're found
@@ -99,30 +134,44 @@ object VideoRepository {
         
         // Then scan for new videos progressively
         val videos = mutableListOf<Video>()
-        LocalVideoScanner.scanLocalVideosProgressively(context) { video ->
-            if (!video.isShort) {
-                videos.add(video)
-                trySend(videos.toList()) // Emit updated list immediately
+        withContext(Dispatchers.IO) {
+            LocalVideoScanner.scanLocalVideosProgressively(context) { video ->
+                if (!video.isShort) {
+                    videos.add(video)
+                    trySend(videos.toList()) // Emit updated list immediately
+                }
             }
         }
-        
-        // Update cache after scan completes
+        // Update cache after scan completes and close the channel
         cachedVideos = videos
         lastScanTime = System.currentTimeMillis()
-        
+        close()
         awaitClose { }
     }.flowOn(Dispatchers.IO)
     
     // Get all shorts with caching
     suspend fun getAllShorts(): List<Video> {
+        return when (val result = getAllShortsResult()) {
+            is Result.Success -> result.data
+            is Result.Error -> emptyList() // Backward compatibility
+            is Result.Loading -> emptyList()
+        }
+    }
+    
+    // Get all shorts with proper error handling
+    suspend fun getAllShortsResult(): Result<List<Video>> {
         val currentTime = System.currentTimeMillis()
         if (cachedShorts == null || currentTime - lastScanTime > CACHE_DURATION) {
-            val allVideos = scanLocalVideos()
-            cachedVideos = allVideos.filter { !it.isShort }
-            cachedShorts = allVideos.filter { it.isShort }
-            lastScanTime = currentTime
+            return scanLocalVideosResult().also { result ->
+                if (result is Result.Success) {
+                    val allVideos = result.data
+                    cachedVideos = allVideos.filter { !it.isShort }
+                    cachedShorts = allVideos.filter { it.isShort }
+                    lastScanTime = currentTime
+                }
+            }
         }
-        return cachedShorts ?: emptyList()
+        return Result.Success(cachedShorts ?: emptyList())
     }
     
     // Progressive shorts loading - emits videos as they're found
@@ -136,17 +185,18 @@ object VideoRepository {
         
         // Then scan for new videos progressively
         val shorts = mutableListOf<Video>()
-        LocalVideoScanner.scanLocalVideosProgressively(context) { video ->
-            if (video.isShort) {
-                shorts.add(video)
-                trySend(shorts.toList()) // Emit updated list immediately
+        withContext(Dispatchers.IO) {
+            LocalVideoScanner.scanLocalVideosProgressively(context) { video ->
+                if (video.isShort) {
+                    shorts.add(video)
+                    trySend(shorts.toList()) // Emit updated list immediately
+                }
             }
         }
-        
-        // Update cache after scan completes
+        // Update cache after scan completes and close the channel
         cachedShorts = shorts
         lastScanTime = System.currentTimeMillis()
-        
+        close()
         awaitClose { }
     }.flowOn(Dispatchers.IO)
     

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
 import android.provider.Settings
+import com.kidscurated.player.BuildConfig
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.from
@@ -41,9 +42,10 @@ object Analytics {
     private const val KEY_APP_OPENS = "app_opens_count"
     private const val KEY_LAST_OPEN = "last_open_time"
     
-    // TODO: Replace with your Supabase credentials
-    private const val SUPABASE_URL = "https://mpudbsgszekwghohwcwf.supabase.co"
-    private const val SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wdWRic2dzemVrd2dob2h3Y3dmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTg4OTEsImV4cCI6MjA3NTU5NDg5MX0.3HbXbLlwHAYIgE7RCGMb-RpBnD-V760vGWYAn4RRVTw"
+    // Credentials loaded from BuildConfig (compiled into APK)
+    // Supabase anon keys are public by design - safe to be in client apps
+    private val SUPABASE_URL: String = BuildConfig.SUPABASE_URL
+    private val SUPABASE_KEY: String = BuildConfig.SUPABASE_ANON_KEY
     
     private var prefs: SharedPreferences? = null
     private var appContext: Context? = null
@@ -51,13 +53,17 @@ object Analytics {
     // Coroutine scope for analytics operations
     private val analyticsScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     
-    // Lazy initialization of Supabase client
+    // Lazy initialization of Supabase client (only if credentials are configured)
     private val supabase by lazy {
-        createSupabaseClient(
-            supabaseUrl = SUPABASE_URL,
-            supabaseKey = SUPABASE_KEY
-        ) {
-            install(Postgrest)
+        if (SUPABASE_URL.isNotEmpty() && SUPABASE_KEY.isNotEmpty()) {
+            createSupabaseClient(
+                supabaseUrl = SUPABASE_URL,
+                supabaseKey = SUPABASE_KEY
+            ) {
+                install(Postgrest)
+            }
+        } else {
+            null // Analytics disabled if credentials not configured
         }
     }
     
@@ -162,7 +168,7 @@ object Analytics {
         return DeviceInfo(
             deviceType = "${Build.MANUFACTURER} ${Build.MODEL}",
             androidVersion = "Android ${Build.VERSION.RELEASE}",
-            appVersion = "1.1.0", // TODO: Get from BuildConfig
+            appVersion = BuildConfig.APP_VERSION_NAME,
             countryCode = context.resources.configuration.locales[0].country
         )
     }
@@ -173,7 +179,7 @@ object Analytics {
     private suspend fun sendInstallEvent(userId: String, installTime: Long) {
         withContext(Dispatchers.IO) {
             try {
-                if (SUPABASE_URL == "YOUR_SUPABASE_URL") {
+                if (supabase == null || SUPABASE_URL.isEmpty() || SUPABASE_KEY.isEmpty()) {
                     println("⚠️ Supabase not configured - skipping analytics upload")
                     return@withContext
                 }
@@ -189,7 +195,7 @@ object Analytics {
                     countryCode = deviceInfo.countryCode
                 )
                 
-                supabase.from("user_installs").insert(installData)
+                supabase?.from("user_installs")?.insert(installData)
                 println("✅ Install event sent to Supabase")
                 
             } catch (e: Exception) {
@@ -204,7 +210,7 @@ object Analytics {
     private suspend fun sendAppOpenEvent(openCount: Int) {
         withContext(Dispatchers.IO) {
             try {
-                if (SUPABASE_URL == "YOUR_SUPABASE_URL") {
+                if (supabase == null || SUPABASE_URL.isEmpty() || SUPABASE_KEY.isEmpty()) {
                     return@withContext
                 }
                 
@@ -220,7 +226,7 @@ object Analytics {
                     appVersion = deviceInfo.appVersion
                 )
                 
-                supabase.from("app_opens").insert(openData)
+                supabase?.from("app_opens")?.insert(openData)
                 
             } catch (e: Exception) {
                 println("❌ Error sending app open event: ${e.message}")
@@ -237,7 +243,7 @@ object Analytics {
     suspend fun sendEvent(eventName: String, properties: Map<String, Any> = emptyMap()) {
         withContext(Dispatchers.IO) {
             try {
-                if (SUPABASE_URL == "YOUR_SUPABASE_URL") {
+                if (supabase == null || SUPABASE_URL.isEmpty() || SUPABASE_KEY.isEmpty()) {
                     return@withContext
                 }
                 
@@ -254,7 +260,7 @@ object Analytics {
                     appVersion = deviceInfo.appVersion
                 )
                 
-                supabase.from("analytics_events").insert(eventData)
+                supabase?.from("analytics_events")?.insert(eventData)
                 
             } catch (e: Exception) {
                 println("❌ Error sending event: ${e.message}")

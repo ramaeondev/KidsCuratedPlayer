@@ -17,7 +17,7 @@ Essential information for parents about keeping your child safe while using this
 - **No Direct YouTube Access** - Cannot open the real YouTube app
 
 ### ⚠️ What You Need to Know
-- **Internet Required** - Videos stream from YouTube, so internet access is needed
+- **Internet Optional** - App plays local videos from your device storage; internet is NOT required for playback
 - **Parent Configuration** - You must add all videos manually
 - **Device Access** - Child has access to whatever videos you've added
 - **No Time Limits** - Built-in screen time limits are not included (use device parental controls)

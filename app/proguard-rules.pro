@@ -20,8 +20,7 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-# Keep YouTube Player classes
--keep class com.pierfrancescosoffritti.androidyoutubeplayer.** { *; }
+# YouTube Player removed – no keep rules needed
 
 # Keep ExoPlayer classes
 -keep class com.google.android.exoplayer2.** { *; }

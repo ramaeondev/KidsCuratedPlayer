@@ -11,13 +11,32 @@ android {
         applicationId "com.kidscurated.player"
         minSdk 24
         targetSdk 34
-        versionCode 3
-        versionName "1.2.0"
+        versionCode 4
+        versionName "2.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
         }
+        
+        // Supabase credentials - anon keys are safe to be public (included in APK)
+        // Can override via local.properties for different environments
+        def localProperties = new Properties()
+        def localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.withInputStream { localProperties.load(it) }
+        }
+        
+        // Default Supabase credentials (anon keys are public by design - safe in APK)
+        def defaultSupabaseUrl = "https://mpudbsgszekwghohwcwf.supabase.co"
+        def defaultSupabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wdWRic2dzemVrd2dob2h3Y3dmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMTg4OTEsImV4cCI6MjA3NTU5NDg5MX0.3HbXbLlwHAYIgE7RCGMb-RpBnD-V760vGWYAn4RRVTw"
+        
+        // Use local.properties if set, otherwise use defaults (compiled into APK)
+        buildConfigField "String", "SUPABASE_URL", "\"${localProperties.getProperty('supabase.url', defaultSupabaseUrl)}\""
+        buildConfigField "String", "SUPABASE_ANON_KEY", "\"${localProperties.getProperty('supabase.anon.key', defaultSupabaseKey)}\""
+        
+        // BuildConfig fields
+        buildConfigField "String", "APP_VERSION_NAME", "\"${versionName}\""
     }
 
     buildTypes {
@@ -56,6 +75,7 @@ android {
     buildFeatures {
         compose true
         viewBinding true
+        buildConfig true
     }
     composeOptions {
         kotlinCompilerExtensionVersion '1.5.1'
@@ -83,8 +103,7 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer-ui:2.19.1'
     implementation 'com.google.android.exoplayer:extension-okhttp:2.19.1'
     
-    // YouTube Android Player API (for YouTube playback)
-    implementation 'com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0'
+    // Removed YouTube Android Player API – app now plays only local videos via ExoPlayer
     
     // Coil for image loading + video frame extraction
     implementation 'io.coil-kt:coil-compose:2.5.0'

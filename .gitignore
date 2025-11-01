@@ -114,3 +114,4 @@ lint-results.xml
 
 # Mac
 .DS_Store
+.vscode/settings.json

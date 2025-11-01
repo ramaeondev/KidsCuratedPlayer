@@ -57,55 +57,51 @@ jobs:
         run: |
           cat > release_notes.md << 'EOF'
           ## 🎬 YouKids - Release ${{ steps.version.outputs.VERSION }}
-          
+
           ### 📱 Download & Install
-          
+
           1. **Download** the APK file below
           2. **Transfer** to your Android device
           3. **Enable** "Install from Unknown Sources" in Settings
           4. **Tap** the APK to install
           5. **Launch** YouKids
-          
-          ### ✨ Features
-          
-          - YouTube-like interface for kids
-          - Parent-curated video feeds
-          - No algorithms, no Shorts addiction
-          - WebView-based video playback
-          - Home, Shorts, and Library sections
-          - Offline installation (no Play Store needed)
-          
-          ### 🎯 Customization
-          
-          To add your own videos:
-          1. Edit `app/src/main/java/com/kidscurated/player/data/VideoRepository.kt`
-          2. Replace sample videos with your YouTube video IDs
-          3. Rebuild using GitHub Actions or locally
-          
+
+          ### ✨ What's new in 2.0
+
+          - 🚀 Faster playback with ExoPlayer and hardware acceleration
+          - 📂 Local videos only (no YouTube, no WebView, no iframe)
+          - ⚡ Progressive loading: videos appear instantly as we scan
+          - 🧠 Smarter caching for thumbnails and video data
+          - 🎨 Unified icon/logo throughout the app
+
+          ### 🎯 How to use
+
+          - Add videos to your device's gallery (Downloads/DCIM/Movies, etc.)
+          - On first launch, grant storage permission when prompted
+          - Home shows landscape videos; Shorts shows portrait videos
+
           ### 📚 Documentation
-          
+
           - [Quick Start Guide](https://github.com/${{ github.repository }}/blob/main/QUICK_START.md)
-          - [Video Configuration Guide](https://github.com/${{ github.repository }}/blob/main/VIDEO_CONFIGURATION_GUIDE.md)
           - [Parent Safety Guide](https://github.com/${{ github.repository }}/blob/main/PARENT_SAFETY_GUIDE.md)
           - [Build Guide](https://github.com/${{ github.repository }}/blob/main/BUILD_GUIDE.md)
-          
+
           ### 🔧 Technical Details
-          
+
           - **Min Android Version:** 7.0 (API 24)
           - **Target Android Version:** 14 (API 34)
           - **APK Size:** ~18 MB
           - **Architecture:** Universal (ARM, x86)
-          
+
           ### ⚠️ Important Notes
-          
+
           - This is a debug APK for personal use
           - No data collection or tracking
           - No user accounts required
-          - Internet needed only for video playback
-          - Videos are loaded directly from YouTube
-          
+          - Internet not required for local playback
+
           ---
-          
+
           **Built with ❤️ for parents protecting their kids from algorithmic addiction**
           EOF
       

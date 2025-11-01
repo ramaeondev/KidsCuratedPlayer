@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         } else {
-            println("⚠️ Storage permission denied - app will only show YouTube videos")
+            println("⚠️ Storage permission denied - cannot access local videos")
         }
     }
     

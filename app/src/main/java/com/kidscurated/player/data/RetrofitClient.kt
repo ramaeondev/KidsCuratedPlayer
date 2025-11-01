@@ -6,6 +6,12 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+/**
+ * Retrofit client for Supabase REST API
+ * 
+ * NOTE: This is currently unused as the app uses local videos only.
+ * Kept for future remote video support.
+ */
 object RetrofitClient {
     
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
