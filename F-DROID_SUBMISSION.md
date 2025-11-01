@@ -28,7 +28,9 @@ All dependencies are F-Droid compatible:
 - ✓ Retrofit/OkHttp (Apache 2.0)
 - ✓ Supabase Kotlin SDK (MIT)
 - ✓ Ktor (Apache 2.0)
-- ✓ YouTube Android Player (Apache 2.0)
+  
+Removed in v2.0.0:
+- ✗ YouTube Android Player (no longer used; app is local-only)
 
 ### ✅ Privacy
 - No tracking SDKs (Firebase, Crashlytics, etc.)
