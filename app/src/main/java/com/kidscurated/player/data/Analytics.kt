@@ -74,10 +74,11 @@ object Analytics {
         appContext = context.applicationContext
         prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         
-        // Generate or retrieve anonymous user ID
-        if (getAnonymousUserId() == null) {
-            generateAnonymousUserId(context)
-        }
+        // Ensure we have a device-bound anonymous user ID.
+        // If app data was restored from another device (Android Auto Backup),
+        // the stored ID may belong to a different device. In that case,
+        // regenerate using this device's ANDROID_ID so each device is unique.
+        ensureDeviceBoundAnonymousId(context)
         
         // Track app open
         trackAppOpen()
@@ -123,6 +124,37 @@ object Analytics {
             // Fallback: use only random UUID
             val fallbackId = "fallback_${UUID.randomUUID()}"
             prefs?.edit()?.putString(KEY_USER_ID, fallbackId)?.apply()
+        }
+    }
+
+    /**
+     * Ensure stored anonymous ID matches the current device's ANDROID_ID prefix.
+     * If preferences were restored from a different device, the stored ID will
+     * have another device's ANDROID_ID. Regenerate in that case so each device
+     * contributes a distinct user_id in Supabase.
+     */
+    private fun ensureDeviceBoundAnonymousId(context: Context) {
+        val stored = getAnonymousUserId()
+        val currentAndroidId = try {
+            Settings.Secure.getString(
+                context.contentResolver,
+                Settings.Secure.ANDROID_ID
+            ) ?: ""
+        } catch (e: Exception) {
+            ""
+        }
+
+        // If no ID yet, or restored ID doesn't belong to this device, generate anew
+        val expectedPrefix = if (currentAndroidId.isNotEmpty()) "${currentAndroidId}_" else null
+        val needsRegeneration = when {
+            stored == null -> true
+            expectedPrefix == null -> false // can't validate, keep existing
+            !stored.startsWith(expectedPrefix) -> true
+            else -> false
+        }
+
+        if (needsRegeneration) {
+            generateAnonymousUserId(context)
         }
     }
     
