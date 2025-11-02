@@ -20,6 +20,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import com.kidscurated.player.data.Analytics
+import com.kidscurated.player.BuildConfig
 import coil.compose.AsyncImage
 import com.kidscurated.player.data.Video
 import com.kidscurated.player.data.VideoRepository
@@ -31,12 +35,30 @@ fun HomeScreen(navController: NavController) {
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    var analyticsPinged by remember { mutableStateOf(false) }
     
     // Track thumbnail generation progress
     val thumbnailProgress by com.kidscurated.player.data.ThumbnailGenerator.progress.collectAsState()
     
     // Progressive video loading - videos appear immediately as they're found
     LaunchedEffect(Unit) {
+        // Send a lightweight analytics event so we can verify pipeline end-to-end
+        if (!analyticsPinged) {
+            analyticsPinged = true
+            try {
+                Analytics.sendEvent(
+                    eventName = "home_visible",
+                    properties = mapOf(
+                        "version" to BuildConfig.APP_VERSION_NAME,
+                        "build_type" to BuildConfig.BUILD_TYPE
+                    )
+                )
+            } catch (_: Exception) {
+                // ignore
+            }
+        }
+
         scope.launch {
             try {
                 VideoRepository.getAllVideosProgressively().collect { videoList ->

@@ -12,6 +12,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import android.content.Intent
+import android.net.Uri
+import com.kidscurated.player.BuildConfig
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -63,7 +67,12 @@ fun YouTubeApp() {
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Black,
                         titleContentColor = Color.White
-                    )
+                    ),
+                    actions = {
+                        if (currentRoute == Screen.Home.route) {
+                            TopBarOverflowMenu()
+                        }
+                    }
                 )
             }
         },
@@ -127,4 +136,97 @@ fun YouTubeApp() {
             }
         }
     }
+}
+
+@Composable
+private fun TopBarOverflowMenu() {
+    val context = LocalContext.current
+    var expanded by remember { mutableStateOf(false) }
+    var showAbout by remember { mutableStateOf(false) }
+
+    IconButton(onClick = { expanded = true }) {
+        Icon(imageVector = Icons.Default.MoreVert, contentDescription = "More", tint = Color.White)
+    }
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false }
+    ) {
+        DropdownMenuItem(
+            text = { Text("About YouKids") },
+            onClick = { expanded = false; showAbout = true }
+        )
+        DropdownMenuItem(
+            text = { Text("Terms & Conditions") },
+            onClick = {
+                expanded = false
+                val url = "https://github.com/ramaeondev/KidsCuratedPlayer/blob/main/TERMS_AND_CONDITIONS.md"
+                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            }
+        )
+        DropdownMenuItem(
+            text = { Text("Developer Info") },
+            onClick = {
+                expanded = false
+                val url = "https://github.com/ramaeondev/KidsCuratedPlayer#readme"
+                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            }
+        )
+        DropdownMenuItem(
+            text = { Text("GitHub Repository") },
+            onClick = {
+                expanded = false
+                val url = "https://github.com/ramaeondev/KidsCuratedPlayer"
+                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            }
+        )
+        DropdownMenuItem(
+            text = { Text("Changelog") },
+            onClick = {
+                expanded = false
+                val url = "https://github.com/ramaeondev/KidsCuratedPlayer/blob/main/CHANGELOG.md"
+                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            }
+        )
+        Divider()
+        DropdownMenuItem(
+            text = { Text("Analytics Diagnostics") },
+            onClick = {
+                expanded = false
+                // Open README analytics section for troubleshooting
+                val url = "https://github.com/ramaeondev/KidsCuratedPlayer/blob/main/SUPABASE_SETUP.md#troubleshooting"
+                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            }
+        )
+    }
+
+    if (showAbout) {
+        AboutDialog(onDismiss = { showAbout = false })
+    }
+}
+
+@Composable
+private fun AboutDialog(onDismiss: () -> Unit) {
+    val versionName = BuildConfig.APP_VERSION_NAME
+    val buildType = BuildConfig.BUILD_TYPE
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Close") }
+        },
+        title = { Text("About YouKids") },
+        text = {
+            Column {
+                Text("A private, offline-first video player for kids.")
+                Spacer(Modifier.height(12.dp))
+                val versionLine = if (buildType != "release") {
+                    "Version: $versionName ($buildType)"
+                } else {
+                    "Version: $versionName"
+                }
+                Text(versionLine, style = MaterialTheme.typography.bodyMedium)
+                Spacer(Modifier.height(8.dp))
+                Text("Motto: Safe. Simple. Offline.")
+            }
+        }
+    )
 }
