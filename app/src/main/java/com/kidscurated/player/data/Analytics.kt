@@ -14,6 +14,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 import java.util.UUID
 
 /**
@@ -272,7 +273,7 @@ object Analytics {
      * Example usage:
      * Analytics.sendEvent("video_played", mapOf("video_id" to "123", "duration" to 120))
      */
-    suspend fun sendEvent(eventName: String, properties: Map<String, Any> = emptyMap()) {
+    suspend fun sendEvent(eventName: String, properties: Map<String, String> = emptyMap()) {
         withContext(Dispatchers.IO) {
             try {
                 if (supabase == null || SUPABASE_URL.isEmpty() || SUPABASE_KEY.isEmpty()) {
@@ -319,31 +320,31 @@ private data class DeviceInfo(
 
 @Serializable
 private data class UserInstall(
-    val userId: String,
-    val installTime: Long,
-    val deviceType: String,
-    val androidVersion: String,
-    val appVersion: String,
-    val countryCode: String
+    @SerialName("user_id") val userId: String,
+    @SerialName("install_time") val installTime: Long,
+    @SerialName("device_type") val deviceType: String,
+    @SerialName("android_version") val androidVersion: String,
+    @SerialName("app_version") val appVersion: String,
+    @SerialName("country_code") val countryCode: String
 )
 
 @Serializable
 private data class AppOpen(
-    val userId: String,
-    val timestamp: Long,
-    val openCount: Int,
-    val deviceType: String,
-    val androidVersion: String,
-    val appVersion: String
+    @SerialName("user_id") val userId: String,
+    @SerialName("timestamp") val timestamp: Long,
+    @SerialName("open_count") val openCount: Int,
+    @SerialName("device_type") val deviceType: String,
+    @SerialName("android_version") val androidVersion: String,
+    @SerialName("app_version") val appVersion: String
 )
 
 @Serializable
 private data class AnalyticsEvent(
-    val userId: String,
-    val eventName: String,
-    val timestamp: Long,
-    val properties: Map<String, Any>,
-    val deviceType: String,
-    val androidVersion: String,
-    val appVersion: String
+    @SerialName("user_id") val userId: String,
+    @SerialName("event_name") val eventName: String,
+    @SerialName("timestamp") val timestamp: Long,
+    val properties: Map<String, String>,
+    @SerialName("device_type") val deviceType: String,
+    @SerialName("android_version") val androidVersion: String,
+    @SerialName("app_version") val appVersion: String
 )
